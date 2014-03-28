@@ -20,8 +20,8 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
     protected static final int VIEW_TYPE_SECTION = 0;
     protected static final int VIEW_TYPE_ITEM = 1;
 
-    protected SortedMap<Integer, Object> sections = new TreeMap<>(); // should not be null
-    ArrayList<Integer> sectionList = new ArrayList<>();
+    protected SortedMap<Integer, Object> sections = new TreeMap<Integer, Object>(); // should not be null
+    ArrayList<Integer> sectionList = new ArrayList<Integer>();
     private Object[] fastScrollObjects;
 
     @TargetApi(11)
@@ -50,7 +50,7 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
             cursor.moveToPosition(-1);
             sections = buildSections(cursor);
             if (sections == null) {
-                sections = new TreeMap<>();
+                sections = new TreeMap<Integer, Object>();
             }
         }
     }
