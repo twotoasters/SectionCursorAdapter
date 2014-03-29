@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:padding="@dimen/activity_vertical_margin"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:background="@color/frame_bg"
+        android:layout_height="wrap_content">
+
+        <View
+            android:layout_width="@dimen/toaster_width"
+            android:layout_height="@dimen/shadow_size"
+            android:background="@drawable/frame_shadow_top"/>
+
+        <View
+            android:layout_width="@dimen/shadow_size"
+            android:layout_height="@dimen/toaster_width"
+            android:background="@drawable/frame_shadow_left"/>
+
+        <View
+            android:layout_width="@dimen/shadow_size"
+            android:layout_height="@dimen/toaster_width"
+            android:layout_gravity="right"
+            android:background="@drawable/frame_glow_right"/>
+
+        <View
+            android:layout_width="@dimen/toaster_width"
+            android:layout_height="@dimen/shadow_size"
+            android:layout_gravity="bottom"
+            android:background="@drawable/frame_glow_bottom"/>
+
+        <ViewSwitcher
+            android:id="@+id/switcherImg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/imgToaster"
+                android:padding="10dp"
+                android:layout_width="@dimen/toaster_width"
+                android:layout_height="@dimen/toaster_width"/>
+
+            <ImageView
+                android:id="@+id/imgHuman"
+                android:padding="10dp"
+                android:layout_width="@dimen/toaster_width"
+                android:layout_height="@dimen/toaster_width"/>
+        </ViewSwitcher>
+    </FrameLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_marginRight="@dimen/item_margin"
+        android:layout_marginLeft="@dimen/item_margin"
+        android:layout_height="@dimen/toaster_width">
+
+        <TextView
+            android:id="@+id/txtName"
+            tools:text="Chris"
+            android:textColor="@color/toaster_name"
+            android:textSize="@dimen/toaster_name_font_size"
+            android:gravity="center_horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/txtJob"
+            android:textSize="@dimen/toaster_job_font_size"
+            tools:text="Android Developer"
+            android:gravity="center_horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+</LinearLayout>

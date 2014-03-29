@@ -3,4 +3,16 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
+    <!-- Toaster -->
+    <dimen name="toaster_job_font_size">12sp</dimen>
+    <dimen name="toaster_name_font_size">18sp</dimen>
+    <dimen name="toaster_width">148dp</dimen>
+    <dimen name="img_width">128dp</dimen>
+    <dimen name="item_margin">8dp</dimen>
+    <dimen name="shadow_size">4dp</dimen>
+
+    <!-- Section -->
+    <dimen name="section_font_size">32sp</dimen>
+    <dimen name="section_height">50dp</dimen>
+
     </resources>
