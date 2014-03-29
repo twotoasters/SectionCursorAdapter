@@ -76,8 +76,10 @@ public class ToastersAdapter extends SectionCursorAdapter {
         holder.txtJob.setText(toaster.jobDescription);
 
 
-        Picasso.with(context).load(toaster.imageUrl).transform(mToasterTrans).into(holder.imgToaster);
-        Picasso.with(context).load(toaster.imageUrl).transform(mHumanTrans).into(holder.imgHuman);
+        Picasso.with(context).load(toaster.imageUrl).error(R.drawable.toaster_backup)
+                .transform(mToasterTrans).into(holder.imgToaster);
+        Picasso.with(context).load(toaster.imageUrl).error(R.drawable.toaster_backup)
+                .transform(mHumanTrans).into(holder.imgHuman);
 
         if (holder.switcher.getDisplayedChild() != 0) {
             holder.switcher.showPrevious();
