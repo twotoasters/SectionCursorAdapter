@@ -3,9 +3,12 @@ package com.twotoasters.sectioncursoradapter;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.database.Cursor;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
+import android.support.v4.widget.CursorAdapter;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CursorAdapter;
 import android.widget.SectionIndexer;
 
 import java.util.ArrayList;
@@ -20,25 +23,43 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
     protected static final int VIEW_TYPE_SECTION = 0;
     protected static final int VIEW_TYPE_ITEM = 1;
 
-    protected SortedMap<Integer, Object> sections = new TreeMap<Integer, Object>(); // should not be null
-    ArrayList<Integer> sectionList = new ArrayList<Integer>();
-    private Object[] fastScrollObjects;
+    protected SortedMap<Integer, Object> mSections = new TreeMap<Integer, Object>(); // should not be null
+    ArrayList<Integer> mSectionList = new ArrayList<Integer>();
+    private Object[] mFastScrollObjects;
+
+    private LayoutInflater mLayoutInflater;
 
     @TargetApi(11)
     public SectionCursorAdapter(Context context, Cursor cursor, int flags) {
         super(context, cursor, flags);
-        buildSections();
+        init(context, null);
     }
 
     protected SectionCursorAdapter(Context context, Cursor c, boolean autoRequery, SortedMap<Integer, Object> sections) {
         super(context, c, autoRequery);
-        this.sections = sections;
+        init(context, sections);
     }
 
     @Deprecated
     public SectionCursorAdapter(Context context, Cursor cursor) {
         super(context, cursor);
-        buildSections();
+        init(context, null);
+    }
+
+    private void init(Context context, SortedMap<Integer, Object> sections) {
+        mLayoutInflater = LayoutInflater.from(context);
+        if (sections != null) {
+            mSections = sections;
+        } else {
+            buildSections();
+        }
+    }
+
+    /**
+     * @return an inflater to inflate your view with.
+     */
+    protected LayoutInflater getLayoutInflater() {
+        return mLayoutInflater;
     }
 
     /**
@@ -48,9 +69,9 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
         if (hasOpenCursor()) {
             Cursor cursor = getCursor();
             cursor.moveToPosition(-1);
-            sections = buildSections(cursor);
-            if (sections == null) {
-                sections = new TreeMap<Integer, Object>();
+            mSections = buildSections(cursor);
+            if (mSections == null) {
+                mSections = new TreeMap<Integer, Object>();
             }
         }
     }
@@ -146,22 +167,22 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
 
     /**
      *
-     * @param listPosition  the position of the current item in the list with sections included
+     * @param listPosition  the position of the current item in the list with mSections included
      * @return Whether or not the listPosition points to a section.
      */
     public boolean isSection(int listPosition) {
-        return sections.containsKey(listPosition);
+        return mSections.containsKey(listPosition);
     }
 
     /**
-     * This will map a position in the list adapter (which includes sections) to a position in
-     * the cursor (which does not contain sections).
+     * This will map a position in the list adapter (which includes mSections) to a position in
+     * the cursor (which does not contain mSections).
      *
-     * @param listPosition the position of the current item in the list with sections included
+     * @param listPosition the position of the current item in the list with mSections included
      * @return the correct position to use with the cursor
      */
     public int getListPositionWithoutSections(int listPosition) {
-        if (sections.size() == 0) {
+        if (mSections.size() == 0) {
             return listPosition;
         } else if (!isSection(listPosition)) {
             int sectionIndex = getIndexWithinSections(listPosition);
@@ -178,13 +199,13 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
     /**
      * Finds the section index for a given list position.
      *
-     * @param listPosition the position of the current item in the list with sections included
+     * @param listPosition the position of the current item in the list with mSections included
      * @return an index in an ordered list of section names
      */
     public int getIndexWithinSections(int listPosition) {
         boolean isSection = false;
         int numPrecedingSections = 0;
-        for (Integer sectionPosition : sections.keySet()) {
+        for (Integer sectionPosition : mSections.keySet()) {
             if (listPosition > sectionPosition)
                 numPrecedingSections++;
             else if (listPosition == sectionPosition)
@@ -196,8 +217,8 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
     }
 
     private boolean isListPositionBeforeFirstSection(int listPosition, int sectionIndex) {
-        boolean hasSections = sections != null && sections.size() > 0;
-        return sectionIndex == 0 && hasSections && listPosition < sections.firstKey();
+        boolean hasSections = mSections != null && mSections.size() > 0;
+        return sectionIndex == 0 && hasSections && listPosition < mSections.firstKey();
     }
 
     /**
@@ -207,8 +228,8 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
     public void notifyDataSetChanged() {
         if (hasOpenCursor()) {
             buildSections();
-            fastScrollObjects = null;
-            sectionList.clear();
+            mFastScrollObjects = null;
+            mSectionList.clear();
         }
         super.notifyDataSetChanged();
     }
@@ -220,27 +241,27 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
     public void notifyDataSetInvalidated() {
         if (hasOpenCursor()) {
             buildSections();
-            fastScrollObjects = null;
-            sectionList.clear();
+            mFastScrollObjects = null;
+            mSectionList.clear();
         }
         super.notifyDataSetInvalidated();
     }
 
     /**
-     * @param listPosition the position of the current item in the list with sections included
+     * @param listPosition the position of the current item in the list with mSections included
      * @return If the position is a section it will return the value for the position from the section map.
      * Otherwise it will convert to the cursor position and return super.
      */
     @Override
     public Object getItem(int listPosition) {
         if (isSection(listPosition))
-            return sections.get(listPosition);
+            return mSections.get(listPosition);
         else
             return super.getItem(getListPositionWithoutSections(listPosition));
     }
 
     /**
-     * @param listPosition the position of the current item in the list with sections included
+     * @param listPosition the position of the current item in the list with mSections included
      * @return If the position is a section it will return the value for the position from the section map.
      * Otherwise it will return the _id column value.
      */
@@ -263,7 +284,7 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
      */
     @Override
     public int getCount() {
-        return super.getCount() + sections.size();
+        return super.getCount() + mSections.size();
     }
 
     /**
@@ -309,13 +330,13 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
      */
     @Override
     public int getPositionForSection(int sectionIndex) {
-        if (sectionList.size() == 0) {
-            for (Integer key : sections.keySet()) {
-                sectionList.add(key);
+        if (mSectionList.size() == 0) {
+            for (Integer key : mSections.keySet()) {
+                mSectionList.add(key);
             }
         }
 
-        return sectionIndex < sectionList.size() ? sectionList.get(sectionIndex) : getCount();
+        return sectionIndex < mSectionList.size() ? mSectionList.get(sectionIndex) : getCount();
     }
 
     /**
@@ -343,7 +364,7 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
     }
 
     /**
-     * Returns an array of objects representing sections of the list. The
+     * Returns an array of objects representing mSections of the list. The
      * returned array and its contents should be non-null.
      *
      * The list view will call toString() on the objects to get the preview text
@@ -355,10 +376,34 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
      */
     @Override
     public Object[] getSections() {
-        if (fastScrollObjects == null) {
-            Collection<Object> sectionsCollection = sections.values();
-            fastScrollObjects = sectionsCollection.toArray(new Object[sectionsCollection.size()]);
+        if (mFastScrollObjects == null) {
+            mFastScrollObjects = getValues();
         }
-        return fastScrollObjects;
+        return mFastScrollObjects;
+    }
+
+    /**
+     * This only affects SDK < 19.
+     * Override this to control the amount of characters the fast scroll dialog can display.
+     */
+    protected int getMaxIndexerLength() {
+        return 3;
+    }
+
+    /**
+     * The fast scroll dialog only fits a max of 3 letters before KitKat.
+     */
+    private Object[] getValues() {
+        Collection<Object> sectionsCollection = mSections.values();
+        Object[] objects = sectionsCollection.toArray(new Object[sectionsCollection.size()]);
+        if (VERSION.SDK_INT <= VERSION_CODES.KITKAT) {
+            int max = getMaxIndexerLength();
+            for (int i = 0; i < objects.length; i++) {
+                if (objects[i].toString().length() >= max) {
+                    objects[i] = objects[i].toString().substring(0, max);
+                }
+            }
+        }
+        return objects;
     }
 }

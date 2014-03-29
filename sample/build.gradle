@@ -18,7 +18,7 @@ android {
     buildToolsVersion "19.0.3"
 
     defaultConfig {
-        minSdkVersion 7
+        minSdkVersion 8
         targetSdkVersion 19
         versionCode 1
         versionName "1.0"
@@ -40,6 +40,8 @@ apply plugin: 'android-unit-test'
 
 dependencies {
     compile project(':library')
+    compile 'com.squareup.okhttp:okhttp:1.5.2'
+    compile 'com.squareup.picasso:picasso:2.2.+'
     compile 'com.android.support:appcompat-v7:19.+'
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
