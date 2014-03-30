@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
@@ -32,19 +33,18 @@ public class ToastersAdapter extends SectionCursorAdapter {
 
     @Override
     protected SortedMap<Integer, Object> buildSections(Cursor cursor) {
-        TreeMap<Integer, Object> sectionMap = new TreeMap<Integer, Object>();
-        // It is safe to have just one model because I know i have data in ever cell.
+        TreeMap<Integer, Object> sections = new TreeMap<Integer, Object>();
+        // It is safe to have just one model because we know we have data in every cell.
         final ToasterModel toaster = new ToasterModel();
-        int position = 0;
+        int cursorPosition = 0;
         while (cursor.moveToNext() == true) {
             toaster.loadFromCursor(cursor);
-            if (!sectionMap.containsValue(toaster.shortJob)) {
-                sectionMap.put(position, toaster.shortJob);
-                position++;
+            if (!sections.containsValue(toaster.shortJob)) {
+                sections.put(cursorPosition + sections.size(), toaster.shortJob);
             }
-            position++;
+            cursorPosition++;
         }
-        return sectionMap;
+        return sections;
     }
 
     @Override
@@ -75,21 +75,34 @@ public class ToastersAdapter extends SectionCursorAdapter {
         holder.txtName.setText(toaster.name);
         holder.txtJob.setText(toaster.jobDescription);
 
-
-        Picasso.with(context).load(toaster.imageUrl).error(R.drawable.toaster_backup)
-                .transform(mToasterTrans).into(holder.imgToaster);
-        Picasso.with(context).load(toaster.imageUrl).error(R.drawable.toaster_backup)
-                .transform(mHumanTrans).into(holder.imgHuman);
-
-        if (holder.switcher.getDisplayedChild() != 0) {
-            holder.switcher.showPrevious();
-        };
+        Picasso.with(context).load(toaster.imageUrl)
+                .error(R.drawable.toaster_backup).transform(mToasterTrans)
+                .into(holder.imgToaster);
+        Picasso.with(context).load(toaster.imageUrl)
+                .error(R.drawable.toaster_backup).transform(mHumanTrans)
+                .into(holder.imgHuman);
+        // Reseting the view our switcher is showing.
+        switchWithoutAnimation(holder.switcher);
         holder.switcher.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 ((ViewSwitcher) v).showNext();
             }
         });
+    }
+
+    private void switchWithoutAnimation(ViewSwitcher switcher) {
+        if (switcher.getDisplayedChild() != 0) {
+            Animation in = switcher.getInAnimation();
+            Animation out = switcher.getOutAnimation();
+
+            switcher.setInAnimation(null);
+            switcher.setOutAnimation(null);
+
+            switcher.setDisplayedChild(0);
+            switcher.setInAnimation(in);
+            switcher.setOutAnimation(out);
+        };
     }
 
     private static class ViewHolder {
@@ -106,5 +119,10 @@ public class ToastersAdapter extends SectionCursorAdapter {
             imgHuman = (ImageView) convertView.findViewById(R.id.imgHuman);
             switcher = (ViewSwitcher) convertView.findViewById(R.id.switcherImg);
         }
+    }
+
+    @Override
+    protected int getMaxIndexerLength() {
+        return 1;
     }
 }

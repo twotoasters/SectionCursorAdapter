@@ -39,7 +39,9 @@
         <ViewSwitcher
             android:id="@+id/switcherImg"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:inAnimation="@anim/abc_fade_in"
+            android:outAnimation="@anim/abc_fade_out">
 
             <ImageView
                 android:id="@+id/imgToaster"

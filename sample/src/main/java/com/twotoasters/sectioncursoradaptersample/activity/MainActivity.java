@@ -2,7 +2,6 @@ package com.twotoasters.sectioncursoradaptersample.activity;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -13,7 +12,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 
-import com.activeandroid.ActiveAndroid;
 import com.activeandroid.content.ContentProvider;
 import com.twotoasters.sectioncursoradaptersample.R;
 import com.twotoasters.sectioncursoradaptersample.adapter.ToastersAdapter;
@@ -30,11 +28,7 @@ public class MainActivity extends ActionBarActivity implements LoaderCallbacks<C
         setContentView(R.layout.activity_main);
         getSupportActionBar().setTitle(R.string.two_toasters_team);
 
-        SQLiteDatabase db = ActiveAndroid.getDatabase();
-        String orderBy = ToasterModel.SHORT_JOB + " ASC, " + ToasterModel.NAME + " ASC";
-        Cursor cursor = db.query(ToasterModel.TABLE_NAME, null, null, null, null, null, orderBy);
-
-        mAdapter = new ToastersAdapter(this, cursor);
+        mAdapter = new ToastersAdapter(this, null);
         ListView listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(mAdapter);
 
@@ -65,16 +59,16 @@ public class MainActivity extends ActionBarActivity implements LoaderCallbacks<C
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(this, ContentProvider.createUri(ToasterModel.class, null), null, null, null, null);
+        String orderBy = ToasterModel.SHORT_JOB + " ASC, " + ToasterModel.NAME + " ASC";
+        return new CursorLoader(this, ContentProvider.createUri(ToasterModel.class, null), null, null, null, orderBy);
     }
-
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-//        mAdapter.swapCursor(data);
+        mAdapter.swapCursor(data);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-//        mAdapter.swapCursor(null);
+        mAdapter.swapCursor(null);
     }
 }

@@ -1,6 +1,5 @@
 package com.twotoasters.sectioncursoradapter;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Build.VERSION;
@@ -29,7 +28,6 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
 
     private LayoutInflater mLayoutInflater;
 
-    @TargetApi(11)
     public SectionCursorAdapter(Context context, Cursor cursor, int flags) {
         super(context, cursor, flags);
         init(context, null);
@@ -91,7 +89,7 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
         View view;
 
         if (!isSection) {
-            int newPosition = getListPositionWithoutSections(position);
+            int newPosition = getCursorPositionWithoutSections(position);
             if (!cursor.moveToPosition(newPosition)) {
                 throw new IllegalStateException("couldn't move cursor to position " + newPosition);
             }
@@ -181,7 +179,7 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
      * @param listPosition the position of the current item in the list with mSections included
      * @return the correct position to use with the cursor
      */
-    public int getListPositionWithoutSections(int listPosition) {
+    public int getCursorPositionWithoutSections(int listPosition) {
         if (mSections.size() == 0) {
             return listPosition;
         } else if (!isSection(listPosition)) {
@@ -257,7 +255,7 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
         if (isSection(listPosition))
             return mSections.get(listPosition);
         else
-            return super.getItem(getListPositionWithoutSections(listPosition));
+            return super.getItem(getCursorPositionWithoutSections(listPosition));
     }
 
     /**
@@ -270,7 +268,7 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
         if (isSection(listPosition))
             return listPosition;
         else {
-            int cursorPosition = getListPositionWithoutSections(listPosition);
+            int cursorPosition = getCursorPositionWithoutSections(listPosition);
             Cursor cursor = getCursor();
             if (hasOpenCursor() && cursor.moveToPosition(cursorPosition)) {
                 return cursor.getLong(cursor.getColumnIndex("_id"));
@@ -307,7 +305,7 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
     /**
      * @return True if cursor is not null and open.
      */
-    private boolean hasOpenCursor() {
+    protected boolean hasOpenCursor() {
         Cursor cursor = getCursor();
         return cursor != null && !cursor.isClosed();
     }
@@ -335,7 +333,6 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
                 mSectionList.add(key);
             }
         }
-
         return sectionIndex < mSectionList.size() ? mSectionList.get(sectionIndex) : getCount();
     }
 
@@ -396,7 +393,7 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
     private Object[] getValues() {
         Collection<Object> sectionsCollection = mSections.values();
         Object[] objects = sectionsCollection.toArray(new Object[sectionsCollection.size()]);
-        if (VERSION.SDK_INT <= VERSION_CODES.KITKAT) {
+        if (VERSION.SDK_INT < VERSION_CODES.KITKAT) {
             int max = getMaxIndexerLength();
             for (int i = 0; i < objects.length; i++) {
                 if (objects[i].toString().length() >= max) {
