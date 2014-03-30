@@ -79,7 +79,27 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
      * @return A map whose keys are the position at which a section is and values are an object
      * which will be passed to newSectionView and bindSectionView
      */
-    protected abstract SortedMap<Integer, Object> buildSections(Cursor cursor);
+    protected SortedMap<Integer, Object> buildSections(Cursor cursor) {
+        TreeMap<Integer, Object> sections = new TreeMap<Integer, Object>();
+        int cursorPosition = 0;
+        while (cursor.moveToNext()) {
+            Object section = getSectionFromCursor(cursor);
+            if (cursor.getPosition() != cursorPosition)
+                throw new IllegalStateException("Do no move the cursor's position in getSectionFromCursor.");
+            if (!sections.containsValue(section))
+                sections.put(cursorPosition + sections.size(), section);
+            cursorPosition++;
+        }
+        return sections;
+    }
+
+    /**
+     * The object which is return will determine what section this cursor position will be in.
+     * @param cursor
+     * @return the section from the cursor at its current position.
+     * This object will be passed to newSectionView and bindSectionView.
+     */
+    protected abstract Object getSectionFromCursor(Cursor cursor);
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -117,7 +137,7 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
      * This method is from the CursorAdapter and will never be called.
      */
     public final View newView(Context context, Cursor cursor, ViewGroup parent) {
-        return null; // should not be called
+        throw new IllegalStateException("This method is not used by " + SectionCursorAdapter.class.getSimpleName());
     }
 
     @Override
@@ -126,7 +146,7 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
      * This method is from the CursorAdapter and will never be called.
      */
     public final void bindView(View view, Context context, Cursor cursor) {
-        // should not be called
+        throw new IllegalStateException("This method is not used by " + SectionCursorAdapter.class.getSimpleName());
     }
 
     /**

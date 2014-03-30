@@ -6,7 +6,17 @@ SectionCursorAdapter adds sections and fast scroll to CursorAdapter as an easily
 
 This is implemented in a similar way to Android's CursorAdapter which this extends. Instead of having `newView` and `bindView` the SectionCursorAdpater uses `newSectionView` and `bindSectionView` plus `newItemView` and `bindItemView`. 
 
-There is one additional abstract method `SortedMap<Integer, Object> buildSections(Cursor cursor)`. This is the method which tells the adapter how to remap the cursor positions to allow for sections. You can make an alphabitical adapter with the following method. Noob tip: You will have to sort alphabitically when querying your database for your cursor.
+There is one additional abstract method `Object getSectionFromCursor(Cursor cursor)`. This is the method which tells the adapter how to remap the cursor positions to allow for sections. You can make an alphabitical adapter with the following method. Noob tip: You will have to sort alphabitically when querying your database for your cursor.
+
+    @Override
+    protected Object getSectionFromCursor(Cursor cursor) {
+        String name = cursor.getString(nameColumnIndex);
+        String section = name.toUpperCase().substring(0, 1);
+        return section;
+    }
+
+## Advanced
+To build sections in a more advanced way you can override `buildSections`. The following is an example for how to build a simple alphabitical map.
 
     @Override
     protected SortedMap<Integer, Object> buildSections(Cursor cursor) {
@@ -25,7 +35,7 @@ There is one additional abstract method `SortedMap<Integer, Object> buildSection
         return sections;
     }
 
-For more advanced sections you can give a custom object as a value in the map instead of a number or string. This object is then passed through to newSectionView and bindSectionView. To use the fast scroll override `toString` for this object to control what you want displayed in the fast scroll dialog. Note that in versions of Android before KitKat this dialog does not resize to fit content. SectionCursorAdapter only allows a maximum of 3 characters in this dialog on these older version of Android but by overriding `getMaxIndexerLength()` the length will can to whatever you choose.
+You can give a custom object as a value in the map instead of a number or string. This object is then passed through to `newSectionView` and `bindSectionView`. To use the fast scroll with this object override `toString` to control what you want displayed in the fast scroll dialog. Note that in versions of Android before KitKat this dialog does not resize to fit content. SectionCursorAdapter only allows a maximum of 3 characters by default in this dialog on these older version of Android but by overriding `getMaxIndexerLength()` the length will be whatever you choose.
 
 ## License
 

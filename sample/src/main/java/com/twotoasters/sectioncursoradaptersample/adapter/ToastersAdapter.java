@@ -16,9 +16,6 @@ import com.twotoasters.sectioncursoradaptersample.R;
 import com.twotoasters.sectioncursoradaptersample.database.ToasterModel;
 import com.twotoasters.sectioncursoradaptersample.transformation.SquareTransformation;
 
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 public class ToastersAdapter extends SectionCursorAdapter {
 
     private final SquareTransformation mToasterTrans;
@@ -32,19 +29,10 @@ public class ToastersAdapter extends SectionCursorAdapter {
     }
 
     @Override
-    protected SortedMap<Integer, Object> buildSections(Cursor cursor) {
-        TreeMap<Integer, Object> sections = new TreeMap<Integer, Object>();
-        // It is safe to have just one model because we know we have data in every cell.
+    protected Object getSectionFromCursor(Cursor cursor) {
         final ToasterModel toaster = new ToasterModel();
-        int cursorPosition = 0;
-        while (cursor.moveToNext() == true) {
-            toaster.loadFromCursor(cursor);
-            if (!sections.containsValue(toaster.shortJob)) {
-                sections.put(cursorPosition + sections.size(), toaster.shortJob);
-            }
-            cursorPosition++;
-        }
-        return sections;
+        toaster.loadFromCursor(cursor);
+        return toaster.shortJob;
     }
 
     @Override
