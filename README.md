@@ -1,6 +1,6 @@
 # SectionCursorAdapter
 
-![sections](screenshots/sections.png) ![dialog](screenshots/dialog.png)
+![sections](screenshots/sections.png)      ![dialog](screenshots/dialog.png)
 
 SectionCursorAdapter adds sections and fast scroll to CursorAdapter as an easily implementable feature. 
 
