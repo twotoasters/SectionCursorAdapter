@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="window_background">#e7e7e7</color>
+
+    <color name="frame_bg">#33707172</color>
+    <color name="frame_glow">#1AFFFFFF</color>
+    <color name="frame_shadow">#1A000000</color>
+    <color name="toaster_name">#707172</color>
+
+    <color name="section_text_color">#CC2F3031</color>
+
+</resources>

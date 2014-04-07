@@ -1,0 +1,58 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.github.jcandksolutions.gradle:android-unit-test:1.0.+'
+    }
+}
+
+apply plugin: 'android'
+
+repositories {
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+}
+
+android {
+    compileSdkVersion 19
+    buildToolsVersion "19.0.3"
+
+    defaultConfig {
+        minSdkVersion 8
+        targetSdkVersion 19
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            runProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+
+    // Since we are not supporting instrument tests, use the sourceset for our unit tests
+    sourceSets {
+        androidTest.setRoot('src/test')
+    }
+}
+
+apply plugin: 'android-unit-test'
+
+dependencies {
+    compile project(':library')
+    compile 'com.squareup.okhttp:okhttp:1.5.2'
+    compile 'com.squareup.picasso:picasso:2.2.+'
+    compile 'com.android.support:appcompat-v7:19.+'
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    testCompile 'com.squareup:fest-android:1.0.+'
+    testCompile 'junit:junit:4.10'
+    testCompile 'org.mockito:mockito-all:1.9.5'
+    testCompile 'org.robolectric:robolectric:2.3-SNAPSHOT'
+
+    // These should mirror the testCompile dependencies above
+    androidTestCompile 'com.squareup:fest-android:1.0.+'
+    androidTestCompile 'junit:junit:4.10'
+    androidTestCompile 'org.mockito:mockito-all:1.9.5'
+    androidTestCompile 'org.robolectric:robolectric:2.3-SNAPSHOT'
+}
