@@ -374,7 +374,7 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
     @Override
     public Object[] getSections() {
         if (mFastScrollObjects == null) {
-            mFastScrollObjects = getValues();
+            mFastScrollObjects = getFastScrollDialogLabels();
         }
         return mFastScrollObjects;
     }
@@ -388,9 +388,11 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
     }
 
     /**
-     * The fast scroll dialog only fits a max of 3 letters before KitKat.
+     * @return The values which for the sections which will be shown in the fast scroll dialog.
+     * As the only a max of three letters can fit in this dialog before KitKat,
+     * the string value will be trimmed according to to length specified in getMaxIndexerLength().
      */
-    private Object[] getValues() {
+    private Object[] getFastScrollDialogLabels() {
         Collection<Object> sectionsCollection = mSections.values();
         Object[] objects = sectionsCollection.toArray(new Object[sectionsCollection.size()]);
         if (VERSION.SDK_INT < VERSION_CODES.KITKAT) {

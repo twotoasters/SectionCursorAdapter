@@ -65,7 +65,7 @@ public class ToastersAdapter extends SectionCursorAdapter {
 
         return convertView;
     }
-    static String url;
+
     @Override
     protected void bindItemView(View convertView, Context context, Cursor cursor) {
         final ToasterModel toaster = new ToasterModel();
