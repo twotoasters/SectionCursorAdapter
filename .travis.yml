@@ -19,10 +19,6 @@ before_install:
   # install android build tools
   - mkdir -p $ANDROID_HOME/build-tools/
 
-  - wget https://dl-ssl.google.com/android/repository/build-tools_r19-linux.zip
-  - unzip build-tools_r19-linux.zip -d $ANDROID_HOME
-  - mv $ANDROID_HOME/android-4.4 $ANDROID_HOME/build-tools/19
-
   # Install required components.
   # For a full list, run `android list sdk -a --extended`
   # Note that sysimg-18 downloads the ARM, x86 and MIPS images (we should optimize this).
@@ -46,7 +42,6 @@ install:
 
 before_script:
 
-  - cd Code
   #- chmod +x ci/wait_for_emulator.sh
   #- ci/wait_for_emulator.sh
   #- adb shell input keyevent 82 &
