@@ -228,7 +228,7 @@ public class SectionCursorAdapterTest {
 
     private static class TestAdapter extends SectionCursorAdapter {
 
-        private SortedMap<Integer, Object> sections;
+        public SortedMap<Integer, Object> sections;
 
         private TestAdapter(Context context, Cursor cursor, int flags) {
             super(context, cursor, flags);
@@ -257,6 +257,11 @@ public class SectionCursorAdapterTest {
         @Override
         protected SortedMap<Integer, Object> buildSections(Cursor cursor) {
             return this.sections;
+        }
+
+        @Override
+        protected Object getSectionFromCursor(Cursor cursor) {
+            return null;
         }
 
         public void setSections(SortedMap<Integer, Object> sections) {
