@@ -1,8 +1,7 @@
-# SectionCursorAdapter
+# SectionCursorAdapter &nbsp;&nbsp; [![Build Status](https://travis-ci.org/twotoasters/SectionCursorAdapter.png?branch=master)](https://travis-ci.org//twotoasters/SectionCursorAdapter)
+SectionCursorAdapter adds sections and fast scroll to CursorAdapter as an easily implementable feature.
 
 ![sections](screenshots/sections.png)      ![dialog](screenshots/dialog.png)
-
-SectionCursorAdapter adds sections and fast scroll to CursorAdapter as an easily implementable feature. 
 
 ## Basics
 SectionCursorAdapter is implemented in a similar way to Android's CursorAdapter which it extends. Instead of having `newView` and `bindView` the SectionCursorAdpater uses `newSectionView` and `bindSectionView` plus `newItemView` and `bindItemView`. 
@@ -55,7 +54,7 @@ To build sections in a more advanced way you can override `buildSections`. The f
         return sections;
     }
 
-You can give a custom object as a value in the map instead of a number or string. To use the fast scroll with this object override `toString`. This will allow you to control is displayed in the fast scroll dialog. Note that in versions of Android before KitKat this dialog does not resize to fit content. SectionCursorAdapter only allows a maximum of 3 characters by default in this dialog on these older version of Android but by overriding `getMaxIndexerLength()` the length can be whatever you choose.
+You can give a custom object as a value in the map instead of a number or string. To use the fast scroll with this object override `toString`. This will allow you to control what is displayed in the fast scroll dialog. Note that in versions of Android before KitKat this dialog does not resize to fit content. SectionCursorAdapter by default only allows a maximum of 3 characters in this dialog on these older version of Android, but by overriding `getMaxIndexerLength()` the length can be whatever you choose.
 
 ## License
 
