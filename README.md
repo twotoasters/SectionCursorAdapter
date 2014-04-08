@@ -1,4 +1,4 @@
-# SectionCursorAdapter &nbsp;&nbsp; [![Build Status](https://travis-ci.org/twotoasters/SectionCursorAdapter.png?branch=master)](https://travis-ci.org//twotoasters/SectionCursorAdapter)
+# SectionCursorAdapter &nbsp;&nbsp; [![Build Status for master](https://travis-ci.org/twotoasters/SectionCursorAdapter.svg?branch=master)](https://travis-ci.org/twotoasters/SectionCursorAdapter)
 SectionCursorAdapter adds sections and fast scroll to CursorAdapter as an easily implementable feature.
 
 ![sections](screenshots/sections.png)      ![dialog](screenshots/dialog.png)
