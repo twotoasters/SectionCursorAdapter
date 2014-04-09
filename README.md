@@ -5,6 +5,13 @@ SectionCursorAdapter adds sections and fast scroll to CursorAdapter as an easily
 
 ## Download
 
+Sample
+<br />
+<a href="https://play.google.com/store/apps/details?id=com.twotoasters.sectioncursoradaptersample">
+  <img alt="Android app on Google Play"
+       src="https://developer.android.com/images/brand/en_app_rgb_wo_45.png" />
+</a>
+
 If you are using maven add to your pom file:
 ```xml
 <dependency>
