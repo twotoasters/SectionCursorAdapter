@@ -82,7 +82,7 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
     protected SortedMap<Integer, Object> buildSections(Cursor cursor) {
         TreeMap<Integer, Object> sections = new TreeMap<Integer, Object>();
         int cursorPosition = 0;
-        while (cursor.moveToNext()) {
+        while (hasOpenCursor() && cursor.moveToNext()) {
             Object section = getSectionFromCursor(cursor);
             if (cursor.getPosition() != cursorPosition)
                 throw new IllegalStateException("Do no move the cursor's position in getSectionFromCursor.");
@@ -110,7 +110,10 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
 
         if (!isSection) {
             int newPosition = getCursorPositionWithoutSections(position);
-            if (!cursor.moveToPosition(newPosition)) {
+            if (!hasOpenCursor()) {
+                // This only happens when the scroll is super fast and someone backs out.
+                return new View(parent.getContext());
+            } else if (!cursor.moveToPosition(newPosition)) {
                 throw new IllegalStateException("couldn't move cursor to position " + newPosition);
             }
         }
@@ -324,10 +327,15 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
 
     /**
      * @return True if cursor is not null and open.
+     * If the cursor is closed a null cursor will be swapped out.
      */
     protected boolean hasOpenCursor() {
         Cursor cursor = getCursor();
-        return cursor != null && !cursor.isClosed();
+        if (cursor == null || cursor.isClosed()) {
+            swapCursor(null);
+            return false;
+        }
+        return true;
     }
 
     ////////////////////////////////////
