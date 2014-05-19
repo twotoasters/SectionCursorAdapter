@@ -17,7 +17,7 @@ If you are using maven add to your pom file:
 <dependency>
     <groupId>com.twotoasters.SectionCursorAdapter</groupId>
     <artifactId>library</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 </dependency>
 ```
 
