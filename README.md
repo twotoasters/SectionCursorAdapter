@@ -1,5 +1,6 @@
 # SectionCursorAdapter &nbsp;&nbsp; [![Build Status for master](https://travis-ci.org/twotoasters/SectionCursorAdapter.svg?branch=master)](https://travis-ci.org/twotoasters/SectionCursorAdapter)
 SectionCursorAdapter adds sections and fast scroll to CursorAdapter as an easily implementable feature.
+A blog post on the implementation rational can be found on [toastdroid.com](http://toastdroid.com/2014/05/09/adding-sections-to-cursoradapter)
 
 ![sections](screenshots/sections.png)      ![dialog](screenshots/dialog.png)
 
