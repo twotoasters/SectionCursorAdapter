@@ -36,8 +36,8 @@ public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends Vi
     protected static final int VIEW_TYPE_SECTION = 0;
     protected static final int VIEW_TYPE_ITEM = 1;
 
-    private int sectionLayoutResId;
-    private int itemLayoutResId;
+    private int mSectionLayoutResId;
+    private int mItemLayoutResId;
 
     protected SortedMap<Integer, T> mSectionMap = new TreeMap<Integer, T>(); // should not be null
     ArrayList<Integer> mSectionList = new ArrayList<Integer>();
@@ -62,8 +62,8 @@ public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends Vi
     }
 
     private void init(Context context, SortedMap<Integer, T> sections, int sectionLayoutResId, int itemLayoutResId) {
-        this.sectionLayoutResId = sectionLayoutResId;
-        this.itemLayoutResId = itemLayoutResId;
+        this.mSectionLayoutResId = sectionLayoutResId;
+        this.mItemLayoutResId = itemLayoutResId;
         mLayoutInflater = LayoutInflater.from(context);
         if (sections != null) {
             mSectionMap = sections;
@@ -176,7 +176,7 @@ public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends Vi
      * If you do not tag a ViewHolder, the bind methods will give you a null ViewHolder.
      */
     protected View newSectionView(ViewGroup parent, T section) {
-        View view = getInflater().inflate(sectionLayoutResId, parent, false);
+        View view = getInflater().inflate(mSectionLayoutResId, parent, false);
         view.setTag(createSectionViewHolder(view, section));
 
         return view;
@@ -203,7 +203,7 @@ public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends Vi
      * @param parent
      */
     protected View newItemView(Cursor cursor, ViewGroup parent) {
-        View view = getInflater().inflate(itemLayoutResId, parent, false);
+        View view = getInflater().inflate(mItemLayoutResId, parent, false);
         view.setTag(createItemViewHolder(cursor, view));
 
         return view;

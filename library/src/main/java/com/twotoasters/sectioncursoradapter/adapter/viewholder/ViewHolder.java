@@ -3,7 +3,7 @@ package com.twotoasters.sectioncursoradapter.adapter.viewholder;
 import android.view.View;
 
 public abstract class ViewHolder {
-    public View rootView;
+    public final View rootView;
 
     public ViewHolder(View rootView) {
         this.rootView = rootView;

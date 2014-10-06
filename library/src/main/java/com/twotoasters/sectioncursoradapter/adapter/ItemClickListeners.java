@@ -11,7 +11,7 @@ import com.twotoasters.sectioncursoradapter.util.ListAdapterUtils;
 public class ItemClickListeners {
 
     /**
-     * This is a convince class. onItemClick will hand through the item for the position clicked.
+     * This is a convenience class. onItemClick will hand through the item for the position clicked.
      * Note: this adjusts the position param and comes through with header positions removed.
      * As such this will not work to receive header clicks.
      */
