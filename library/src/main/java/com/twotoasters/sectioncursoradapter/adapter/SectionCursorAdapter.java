@@ -1,4 +1,4 @@
-package com.twotoasters.sectioncursoradapter;
+package com.twotoasters.sectioncursoradapter.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -8,46 +8,65 @@ import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListAdapter;
 import android.widget.SectionIndexer;
+
+import com.twotoasters.sectioncursoradapter.adapter.viewholder.ViewHolder;
+import com.twotoasters.sectioncursoradapter.util.ListAdapterUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-public abstract class SectionCursorAdapter extends CursorAdapter implements SectionIndexer {
+/**
+ * This adapter uses the ViewHolder class to completely handle view recycling for you.
+ * This is similar to the new RecyclerViewAdapter.
+ *
+ * @param <T> section type.
+ * @param <S> ViewHolder type for sections.
+ * @param <H> ViewHolder type for items.
+ */
+public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends ViewHolder>  extends CursorAdapter implements SectionIndexer {
 
     public static final int NO_CURSOR_POSITION = -99; // used when mapping section list position to cursor position
 
     protected static final int VIEW_TYPE_SECTION = 0;
     protected static final int VIEW_TYPE_ITEM = 1;
 
-    protected SortedMap<Integer, Object> mSections = new TreeMap<Integer, Object>(); // should not be null
+    private int mSectionLayoutResId;
+    private int mItemLayoutResId;
+
+    protected SortedMap<Integer, T> mSectionMap = new TreeMap<Integer, T>(); // should not be null
     ArrayList<Integer> mSectionList = new ArrayList<Integer>();
     private Object[] mFastScrollObjects;
 
     private LayoutInflater mLayoutInflater;
 
-    public SectionCursorAdapter(Context context, Cursor cursor, int flags) {
+    public SectionCursorAdapter(Context context, Cursor cursor, int flags, int sectionLayoutResId, int itemLayoutResId) {
         super(context, cursor, flags);
-        init(context, null);
+        init(context, null, sectionLayoutResId, itemLayoutResId);
     }
 
-    protected SectionCursorAdapter(Context context, Cursor c, boolean autoRequery, SortedMap<Integer, Object> sections) {
+    protected SectionCursorAdapter(Context context, Cursor c, boolean autoRequery, int sectionLayoutResId, int itemLayoutResId, SortedMap<Integer, T> sections) {
         super(context, c, autoRequery);
-        init(context, sections);
+        init(context, sections, sectionLayoutResId, itemLayoutResId);
     }
 
     @Deprecated
-    public SectionCursorAdapter(Context context, Cursor cursor) {
+    public SectionCursorAdapter(Context context, Cursor cursor, int sectionLayoutResId, int itemLayoutResId) {
         super(context, cursor);
-        init(context, null);
+        init(context, null, sectionLayoutResId, itemLayoutResId);
     }
 
-    private void init(Context context, SortedMap<Integer, Object> sections) {
+    private void init(Context context, SortedMap<Integer, T> sections, int sectionLayoutResId, int itemLayoutResId) {
+        this.mSectionLayoutResId = sectionLayoutResId;
+        this.mItemLayoutResId = itemLayoutResId;
         mLayoutInflater = LayoutInflater.from(context);
         if (sections != null) {
-            mSections = sections;
+            mSectionMap = sections;
         } else {
             buildSections();
         }
@@ -56,7 +75,7 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
     /**
      * @return an inflater to inflate your view with.
      */
-    protected LayoutInflater getLayoutInflater() {
+    protected LayoutInflater getInflater() {
         return mLayoutInflater;
     }
 
@@ -67,9 +86,9 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
         if (hasOpenCursor()) {
             Cursor cursor = getCursor();
             cursor.moveToPosition(-1);
-            mSections = buildSections(cursor);
-            if (mSections == null) {
-                mSections = new TreeMap<Integer, Object>();
+            mSectionMap = buildSections(cursor);
+            if (mSectionMap == null) {
+                mSectionMap = new TreeMap<Integer, T>();
             }
         }
     }
@@ -79,11 +98,11 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
      * @return A map whose keys are the position at which a section is and values are an object
      * which will be passed to newSectionView and bindSectionView
      */
-    protected SortedMap<Integer, Object> buildSections(Cursor cursor) {
-        TreeMap<Integer, Object> sections = new TreeMap<Integer, Object>();
+    protected SortedMap<Integer, T> buildSections(Cursor cursor) {
+        TreeMap<Integer, T> sections = new TreeMap<Integer, T>();
         int cursorPosition = 0;
         while (hasOpenCursor() && cursor.moveToNext()) {
-            Object section = getSectionFromCursor(cursor);
+            T section = getSectionFromCursor(cursor);
             if (cursor.getPosition() != cursorPosition)
                 throw new IllegalStateException("Do no move the cursor's position in getSectionFromCursor.");
             if (!sections.containsValue(section))
@@ -99,12 +118,11 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
      * @return the section from the cursor at its current position.
      * This object will be passed to newSectionView and bindSectionView.
      */
-    protected abstract Object getSectionFromCursor(Cursor cursor);
+    protected abstract T getSectionFromCursor(Cursor cursor);
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         boolean isSection = isSection(position);
-        Context context = parent.getContext();
         Cursor cursor = getCursor();
         View view;
 
@@ -119,16 +137,17 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
         }
 
         if (convertView == null) {
-            view = isSection ? newSectionView(context, getItem(position), parent)
-                    : newItemView(context, cursor, parent);
+            view = isSection ? newSectionView(parent, (T) getItem(position))
+                    : newItemView(cursor, parent);
         } else {
             view = convertView;
         }
 
         if (isSection) {
-            bindSectionView(view, context, position, getItem(position));
+            T section = mSectionMap.get(position);
+            bindSectionViewHolder(position, (S) view.getTag(), parent, section);
         } else {
-            bindItemView(view, context, cursor);
+            bindItemViewHolder((H) view.getTag(), cursor, parent);
         }
 
         return view;
@@ -153,57 +172,75 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
     }
 
     /**
-     * Creates a new section view.
-     * @param context Interface to application's global information
-     * @param item is the item stored in the sorted map for the section header.
-     * @param parent The parent to which the new view is attached.
-     * @return
+     * Override to manually create your views. MAKE SURE YOU TAG A ViewHolder TO THIS VIEW!
+     * If you do not tag a ViewHolder, the bind methods will give you a null ViewHolder.
      */
-    protected abstract View newSectionView(Context context, Object item, ViewGroup parent);
+    protected View newSectionView(ViewGroup parent, T section) {
+        View view = getInflater().inflate(mSectionLayoutResId, parent, false);
+        view.setTag(createSectionViewHolder(view, section));
 
-    /**
-     * Binds data to an existing view.
-     * @param convertView Existing view, returned earlier by newView
-     * @param context Interface to application's global information
-     * @param position
-     * @param item is the item stored in the sorted map for the section header.
-     */
-    protected abstract void bindSectionView(View convertView, Context context, int position, Object item);
-
-    /**
-     * Creates a new item view to use within a section.
-     * @param cursor The cursor from which to get the data. The cursor is already moved to the correct position.
-     * @param parent The parent to which the new view is attached to
-     * @return
-     */
-    protected abstract View newItemView(Context context, Cursor cursor, ViewGroup parent);
-
-    /**
-     * Binds data to an item view
-     * @param convertView Existing view, returned earlier by newView
-     * @param context Interface to application's global information
-     * @param cursor The cursor from which to get the data. The cursor is already moved to the correct position.
-     */
-    protected abstract void bindItemView(View convertView, Context context, Cursor cursor);
-
-    /**
-     *
-     * @param listPosition  the position of the current item in the list with mSections included
-     * @return Whether or not the listPosition points to a section.
-     */
-    public boolean isSection(int listPosition) {
-        return mSections.containsKey(listPosition);
+        return view;
     }
 
     /**
-     * This will map a position in the list adapter (which includes mSections) to a position in
-     * the cursor (which does not contain mSections).
+     * @param sectionView the view which was created for this ViewHolder. There is no need to setTag.
+     * @param section is the item stored in the sorted map for the section header.
+     * @return The newly created section ViewHolder.
+     */
+    protected abstract S createSectionViewHolder(View sectionView, T section);
+
+    /**
+     * @param position
+     * @param section is the item stored in the sorted map for the section header.
+     * @param sectionViewHolder the ViewHolder which should have data bound to. This maybe reused and have old data in it.
+     * @param parent the parent view. Typically a ListView.
+     */
+    protected abstract void bindSectionViewHolder(int position, S sectionViewHolder, ViewGroup parent, T section);
+
+    /**
+     * Override to manually create your views. MAKE SURE YOU TAG A ViewHolder TO THIS VIEW!
+     * If you do not tag a ViewHolder, the bind methods will give you a null ViewHolder.
+     * @param parent
+     */
+    protected View newItemView(Cursor cursor, ViewGroup parent) {
+        View view = getInflater().inflate(mItemLayoutResId, parent, false);
+        view.setTag(createItemViewHolder(cursor, view));
+
+        return view;
+    }
+
+    /**
+     * @param cursor at the correct position for the item.
+     * @param itemView the view which was created for this ViewHolder. There is no need to setTag.
+     * @return the new created item view.
+     */
+    protected abstract H createItemViewHolder(Cursor cursor, View itemView);
+
+    /**
+     * @param itemViewHolder  the ViewHolder which should have data bound to. This maybe reused and have old data in it.
+     * @param parent          the parent view. Typically a ListView.
+     */
+    protected abstract void bindItemViewHolder(H itemViewHolder, Cursor cursor, ViewGroup parent);
+
+
+    /**
      *
-     * @param listPosition the position of the current item in the list with mSections included
+     * @param listPosition  the position of the current item in the list with mSectionMap included
+     * @return Whether or not the listPosition points to a section.
+     */
+    public boolean isSection(int listPosition) {
+        return mSectionMap.containsKey(listPosition);
+    }
+
+    /**
+     * This will map a position in the list adapter (which includes mSectionMap) to a position in
+     * the cursor (which does not contain mSectionMap).
+     *
+     * @param listPosition the position of the current item in the list with mSectionMap included
      * @return the correct position to use with the cursor
      */
     public int getCursorPositionWithoutSections(int listPosition) {
-        if (mSections.size() == 0) {
+        if (mSectionMap.size() == 0) {
             return listPosition;
         } else if (!isSection(listPosition)) {
             int sectionIndex = getIndexWithinSections(listPosition);
@@ -220,13 +257,13 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
     /**
      * Finds the section index for a given list position.
      *
-     * @param listPosition the position of the current item in the list with mSections included
+     * @param listPosition the position of the current item in the list with mSectionMap included
      * @return an index in an ordered list of section names
      */
     public int getIndexWithinSections(int listPosition) {
         boolean isSection = false;
         int numPrecedingSections = 0;
-        for (Integer sectionPosition : mSections.keySet()) {
+        for (Integer sectionPosition : mSectionMap.keySet()) {
             if (listPosition > sectionPosition)
                 numPrecedingSections++;
             else if (listPosition == sectionPosition)
@@ -238,8 +275,8 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
     }
 
     private boolean isListPositionBeforeFirstSection(int listPosition, int sectionIndex) {
-        boolean hasSections = mSections != null && mSections.size() > 0;
-        return sectionIndex == 0 && hasSections && listPosition < mSections.firstKey();
+        boolean hasSections = mSectionMap != null && mSectionMap.size() > 0;
+        return sectionIndex == 0 && hasSections && listPosition < mSectionMap.firstKey();
     }
 
     /**
@@ -269,20 +306,20 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
     }
 
     /**
-     * @param listPosition the position of the current item in the list with mSections included
+     * @param listPosition the position of the current item in the list with mSectionMap included
      * @return If the position is a section it will return the value for the position from the section map.
      * Otherwise it will convert to the cursor position and return super.
      */
     @Override
     public Object getItem(int listPosition) {
         if (isSection(listPosition))
-            return mSections.get(listPosition);
+            return mSectionMap.get(listPosition);
         else
             return super.getItem(getCursorPositionWithoutSections(listPosition));
     }
 
     /**
-     * @param listPosition the position of the current item in the list with mSections included
+     * @param listPosition the position of the current item in the list with mSectionMap included
      * @return If the position is a section it will return the value for the position from the section map.
      * Otherwise it will return the _id column value.
      */
@@ -305,7 +342,7 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
      */
     @Override
     public int getCount() {
-        return super.getCount() + mSections.size();
+        return super.getCount() + mSectionMap.size();
     }
 
     /**
@@ -357,7 +394,7 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
     @Override
     public int getPositionForSection(int sectionIndex) {
         if (mSectionList.size() == 0) {
-            for (Integer key : mSections.keySet()) {
+            for (Integer key : mSectionMap.keySet()) {
                 mSectionList.add(key);
             }
         }
@@ -389,7 +426,7 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
     }
 
     /**
-     * Returns an array of objects representing mSections of the list. The
+     * Returns an array of objects representing mSectionMap of the list. The
      * returned array and its contents should be non-null.
      *
      * The list view will call toString() on the objects to get the preview text
@@ -421,7 +458,7 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
      * the string value will be trimmed according to to length specified in getMaxIndexerLength().
      */
     private Object[] getFastScrollDialogLabels() {
-        Collection<Object> sectionsCollection = mSections.values();
+        Collection<T> sectionsCollection = mSectionMap.values();
         Object[] objects = sectionsCollection.toArray(new Object[sectionsCollection.size()]);
         if (VERSION.SDK_INT < VERSION_CODES.KITKAT) {
             int max = getMaxIndexerLength();
@@ -432,5 +469,56 @@ public abstract class SectionCursorAdapter extends CursorAdapter implements Sect
             }
         }
         return objects;
+    }
+    ////////////////////////
+    // OnItemClicker
+    ////////////////////////
+
+    /**
+     * This class can only be used in conjunction with the SectionListAdapter. It will error otherwise.
+     */
+    public static abstract class OnSectionItemClickListener<K, V> implements OnItemClickListener {
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int listPosition, long id) {
+            ListAdapter listAdapter = ListAdapterUtils.getWrappedAdapter(parent);
+            int adjustedPosition = ListAdapterUtils.getHeaderAdjustedPosition(parent, listPosition);
+
+            if (listAdapter instanceof SectionArrayAdapter) {
+                SectionArrayAdapter<K, V, ViewHolder, ViewHolder> adapter = (SectionArrayAdapter<K, V, ViewHolder, ViewHolder>) listAdapter;
+
+                int sectionPosition = adapter.getSectionPosition(adjustedPosition);
+                int itemPosition = adapter.getItemPosition(adjustedPosition);
+
+                if (adapter.isSection(adjustedPosition)) {
+                    K section = adapter.getSection(sectionPosition);
+                    onSectionClick(parent, view, sectionPosition, section, id);
+                } else {
+                    V item = adapter.getItem(sectionPosition, itemPosition);
+                    onItemInSectionClick(parent, view, sectionPosition, itemPosition, item, id);
+                }
+            } else {
+                throw new IllegalArgumentException("This listener can only be used with the SectionListAdapter.");
+            }
+        }
+
+        /**
+         * @param parent - The AdapterView where the click happened.
+         * @param view - The view within the AdapterView that was clicked (this will be a view provided by the adapter)
+         * @param sectionPosition This is the position within the full list.
+         * @param section The section object which is associated with the view that was clicked.
+         * @param id - The row id of the item that was clicked.
+         */
+        public abstract void onSectionClick(AdapterView<?> parent, View view, int sectionPosition, K section, long id);
+
+        /**
+         * @param parent - The AdapterView where the click happened.
+         * @param view - The view within the AdapterView that was clicked (this will be a view provided by the adapter)
+         * @param sectionPosition This is the position within the full list.
+         * @param itemPosition - This is the position within the full list.
+         * @param item The item object which is associated with the view that was clicked.
+         * @param id - The row id of the item that was clicked.
+         */
+        public abstract void onItemInSectionClick(AdapterView<?> parent, View view, int sectionPosition, int itemPosition, V item, long id);
     }
 }

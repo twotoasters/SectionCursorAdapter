@@ -14,13 +14,13 @@ import android.widget.ListView;
 
 import com.activeandroid.content.ContentProvider;
 import com.twotoasters.sectioncursoradaptersample.R;
-import com.twotoasters.sectioncursoradaptersample.adapter.ToastersAdapter;
+import com.twotoasters.sectioncursoradaptersample.adapter.ToasterAdapter;
 import com.twotoasters.sectioncursoradaptersample.database.ToasterModel;
 
 
 public class MainActivity extends ActionBarActivity implements LoaderCallbacks<Cursor> {
 
-    ToastersAdapter mAdapter;
+    ToasterAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +28,7 @@ public class MainActivity extends ActionBarActivity implements LoaderCallbacks<C
         setContentView(R.layout.activity_main);
         getSupportActionBar().setTitle(R.string.two_toasters_team);
 
-        mAdapter = new ToastersAdapter(this, null);
+        mAdapter = new ToasterAdapter(this, null);
         ListView listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(mAdapter);
 
