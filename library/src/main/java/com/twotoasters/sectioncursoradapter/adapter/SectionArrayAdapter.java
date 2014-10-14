@@ -54,12 +54,12 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
 
     public SectionArrayAdapter(Context context, int sectionLayoutResId, int itemLayoutResId, List<V> listData) {
         init(context, sectionLayoutResId, itemLayoutResId);
-        setDataAndBuildMap(listData);
+        setDataAndBuildSections(listData);
     }
 
     public SectionArrayAdapter(Context context, int sectionLayoutResId, int itemLayoutResId, V[] arrayData) {
         init(context, sectionLayoutResId, itemLayoutResId);
-        setDataAndBuildMap(arrayData);
+        setDataAndBuildSections(arrayData);
     }
 
     private void init(Context context, int sectionLayoutResId, int itemLayoutResId) {
@@ -78,7 +78,7 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
 
     @Override
     public long getItemId(int position) {
-        return 0;
+        return position;
     }
 
     @Override
@@ -114,7 +114,7 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
     /**
      * This method helps with the building of the internal sectionMap.
      * <br />
-     * <strong>Note:</strong> this is only called when setDataAndBuildMap() is used.
+     * <strong>Note:</strong> this is only called when setDataAndBuildSections() is used.
      * @param item an item from the given data set
      * @return The section that this item should be in.
      */
@@ -126,8 +126,8 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
      * <strong>Note:</strong> if your sections are not presorted sections will then be built in random order.
      * @param arrayData an array of all the data which section are to be built with.
      */
-    public void setDataAndBuildMap(V[] arrayData) {
-        setDataAndBuildMap(Arrays.asList(arrayData));
+    public void setDataAndBuildSections(V[] arrayData) {
+        setDataAndBuildSections(Arrays.asList(arrayData));
     }
 
     /**
@@ -136,7 +136,7 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
      * <strong>Note:</strong> if your sections are not presorted sections will then be built in random order.
      * @param listData a list of all the data which section are to be built with.
      */
-    public void setDataAndBuildMap(List<V> listData) {
+    public void setDataAndBuildSections(List<V> listData) {
         LinkedHashMap<K, List<V>> sectionsMap = new LinkedHashMap<K, List<V>>();
 
         for (V item : listData) {
@@ -417,6 +417,10 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
         }
         return POSITION_NOT_FOUND;
     }
+
+    ////////////////
+    // View stuff
+    ////////////////
 
     @Override
     public int getItemViewType(int position) {
