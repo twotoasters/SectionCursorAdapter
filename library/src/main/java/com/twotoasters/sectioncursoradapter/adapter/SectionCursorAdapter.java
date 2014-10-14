@@ -14,6 +14,7 @@ import com.twotoasters.sectioncursoradapter.adapter.viewholder.ViewHolder;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -215,6 +216,23 @@ public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends Vi
     // Positions
     /////////////////
 
+    /**
+     * @return all of the positions that sections are at.
+     */
+    public Set<Integer> getSectionListPositions() {
+        return mSectionMap.keySet();
+    }
+
+    /**
+     * @return the section for the given sectionPosition.
+     * Null will be returned if the section doesn't exist.
+     */
+    public T getSection(int sectionPosition) {
+        if (mSectionList.contains(sectionPosition)) {
+            return mSectionMap.get(mSectionList.get(sectionPosition));
+        }
+        return null;
+    }
 
     /**
      *
@@ -236,7 +254,7 @@ public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends Vi
         if (mSectionMap.size() == 0) {
             return listPosition;
         } else if (!isSection(listPosition)) {
-            int sectionIndex = getIndexWithinSections(listPosition);
+            int sectionIndex = getSectionPosition(listPosition);
             if (isListPositionBeforeFirstSection(listPosition, sectionIndex)) {
                 return listPosition;
             } else {
@@ -253,7 +271,7 @@ public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends Vi
      * @param listPosition the position of the current item in the list with mSectionMap included
      * @return an index in an ordered list of section names
      */
-    public int getIndexWithinSections(int listPosition) {
+    public int getSectionPosition(int listPosition) {
         boolean isSection = false;
         int numPrecedingSections = 0;
         for (Integer sectionPosition : mSectionMap.keySet()) {
@@ -432,7 +450,7 @@ public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends Vi
     @Override
     public int getSectionForPosition(int position) {
         Object[] objects = getSections(); // the fast scroll section objects
-        int sectionIndex = getIndexWithinSections(position);
+        int sectionIndex = getSectionPosition(position);
 
         return sectionIndex < objects.length ? sectionIndex : 0;
     }
