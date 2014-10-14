@@ -8,13 +8,9 @@ import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ListAdapter;
 import android.widget.SectionIndexer;
 
 import com.twotoasters.sectioncursoradapter.adapter.viewholder.ViewHolder;
-import com.twotoasters.sectioncursoradapter.util.ListAdapterUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -120,6 +116,175 @@ public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends Vi
      */
     protected abstract T getSectionFromCursor(Cursor cursor);
 
+    ////////////////////////////////////////
+    // Implemented Abstract/Overrode methods
+    ////////////////////////////////////////
+
+    /**
+     * @return How many items are in the data set represented by this Adapter.
+     */
+    @Override
+    public int getCount() {
+        return super.getCount() + mSectionMap.size();
+    }
+
+    /**
+     * @return Returns the number of types of Views that will be created by getView(int, View, ViewGroup).
+     */
+    @Override
+    public int getViewTypeCount() {
+        return 2;
+    }
+
+    /**
+     * @param listPosition the position of the current item in the list with mSectionMap included
+     * @return If the position is a section it will return the value for the position from the section map.
+     * Otherwise it will convert to the cursor position and return super.
+     */
+    @Override
+    public Object getItem(int listPosition) {
+        if (isSection(listPosition))
+            return mSectionMap.get(listPosition);
+        else
+            return super.getItem(getCursorPositionWithoutSections(listPosition));
+    }
+
+    /**
+     * @param listPosition the position of the current item in the list with mSectionMap included
+     * @return If the position is a section it will return the value for the position from the section map.
+     * Otherwise it will return the _id column value.
+     */
+    @Override
+    public long getItemId(int listPosition) {
+        if (isSection(listPosition))
+            return listPosition;
+        else {
+            int cursorPosition = getCursorPositionWithoutSections(listPosition);
+            Cursor cursor = getCursor();
+            if (hasOpenCursor() && cursor.moveToPosition(cursorPosition)) {
+                return cursor.getLong(cursor.getColumnIndex("_id"));
+            }
+            return NO_CURSOR_POSITION;
+        }
+    }
+
+    /////////////////
+    // Managing Data
+    /////////////////
+
+    /**
+     * Clears out all section data before rebuilding it.
+     */
+    @Override
+    public void notifyDataSetChanged() {
+        if (hasOpenCursor()) {
+            buildSections();
+            mFastScrollObjects = null;
+            mSectionList.clear();
+        }
+        super.notifyDataSetChanged();
+    }
+
+    /**
+     * Clears out all section data before rebuilding it.
+     */
+    @Override
+    public void notifyDataSetInvalidated() {
+        if (hasOpenCursor()) {
+            buildSections();
+            mFastScrollObjects = null;
+            mSectionList.clear();
+        }
+        super.notifyDataSetInvalidated();
+    }
+
+    /**
+     * @return True if cursor is not null and open.
+     * If the cursor is closed a null cursor will be swapped out.
+     */
+    protected boolean hasOpenCursor() {
+        Cursor cursor = getCursor();
+        if (cursor != null && cursor.isClosed()) {
+            swapCursor(null);
+            return false;
+        }
+        return cursor != null;
+    }
+
+    /////////////////
+    // Positions
+    /////////////////
+
+
+    /**
+     *
+     * @param listPosition  the position of the current item in the list with mSectionMap included
+     * @return Whether or not the listPosition points to a section.
+     */
+    public boolean isSection(int listPosition) {
+        return mSectionMap.containsKey(listPosition);
+    }
+
+    /**
+     * This will map a position in the list adapter (which includes mSectionMap) to a position in
+     * the cursor (which does not contain mSectionMap).
+     *
+     * @param listPosition the position of the current item in the list with mSectionMap included
+     * @return the correct position to use with the cursor
+     */
+    public int getCursorPositionWithoutSections(int listPosition) {
+        if (mSectionMap.size() == 0) {
+            return listPosition;
+        } else if (!isSection(listPosition)) {
+            int sectionIndex = getIndexWithinSections(listPosition);
+            if (isListPositionBeforeFirstSection(listPosition, sectionIndex)) {
+                return listPosition;
+            } else {
+                return listPosition - (sectionIndex + 1);
+            }
+        } else {
+            return NO_CURSOR_POSITION;
+        }
+    }
+
+    /**
+     * Finds the section index for a given list position.
+     *
+     * @param listPosition the position of the current item in the list with mSectionMap included
+     * @return an index in an ordered list of section names
+     */
+    public int getIndexWithinSections(int listPosition) {
+        boolean isSection = false;
+        int numPrecedingSections = 0;
+        for (Integer sectionPosition : mSectionMap.keySet()) {
+            if (listPosition > sectionPosition)
+                numPrecedingSections++;
+            else if (listPosition == sectionPosition)
+                isSection = true;
+            else
+                break;
+        }
+        return isSection ? numPrecedingSections : Math.max(numPrecedingSections - 1, 0);
+    }
+
+    private boolean isListPositionBeforeFirstSection(int listPosition, int sectionIndex) {
+        boolean hasSections = mSectionMap != null && mSectionMap.size() > 0;
+        return sectionIndex == 0 && hasSections && listPosition < mSectionMap.firstKey();
+    }
+
+    /////////////////
+    // Views
+    /////////////////
+
+    /**
+     * @param listPosition
+     * @return Get the type of View that will be created by getView(int, View, ViewGroup) for the specified item.
+     */
+    @Override
+    public int getItemViewType(int listPosition) {
+        return isSection(listPosition) ? VIEW_TYPE_SECTION : VIEW_TYPE_ITEM;
+    }
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         boolean isSection = isSection(position);
@@ -222,159 +387,6 @@ public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends Vi
      */
     protected abstract void bindItemViewHolder(H itemViewHolder, Cursor cursor, ViewGroup parent);
 
-
-    /**
-     *
-     * @param listPosition  the position of the current item in the list with mSectionMap included
-     * @return Whether or not the listPosition points to a section.
-     */
-    public boolean isSection(int listPosition) {
-        return mSectionMap.containsKey(listPosition);
-    }
-
-    /**
-     * This will map a position in the list adapter (which includes mSectionMap) to a position in
-     * the cursor (which does not contain mSectionMap).
-     *
-     * @param listPosition the position of the current item in the list with mSectionMap included
-     * @return the correct position to use with the cursor
-     */
-    public int getCursorPositionWithoutSections(int listPosition) {
-        if (mSectionMap.size() == 0) {
-            return listPosition;
-        } else if (!isSection(listPosition)) {
-            int sectionIndex = getIndexWithinSections(listPosition);
-            if (isListPositionBeforeFirstSection(listPosition, sectionIndex)) {
-                return listPosition;
-            } else {
-                return listPosition - (sectionIndex + 1);
-            }
-        } else {
-            return NO_CURSOR_POSITION;
-        }
-    }
-
-    /**
-     * Finds the section index for a given list position.
-     *
-     * @param listPosition the position of the current item in the list with mSectionMap included
-     * @return an index in an ordered list of section names
-     */
-    public int getIndexWithinSections(int listPosition) {
-        boolean isSection = false;
-        int numPrecedingSections = 0;
-        for (Integer sectionPosition : mSectionMap.keySet()) {
-            if (listPosition > sectionPosition)
-                numPrecedingSections++;
-            else if (listPosition == sectionPosition)
-                isSection = true;
-            else
-                break;
-        }
-        return isSection ? numPrecedingSections : Math.max(numPrecedingSections - 1, 0);
-    }
-
-    private boolean isListPositionBeforeFirstSection(int listPosition, int sectionIndex) {
-        boolean hasSections = mSectionMap != null && mSectionMap.size() > 0;
-        return sectionIndex == 0 && hasSections && listPosition < mSectionMap.firstKey();
-    }
-
-    /**
-     * Clears out all section data before rebuilding it.
-     */
-    @Override
-    public void notifyDataSetChanged() {
-        if (hasOpenCursor()) {
-            buildSections();
-            mFastScrollObjects = null;
-            mSectionList.clear();
-        }
-        super.notifyDataSetChanged();
-    }
-
-    /**
-     * Clears out all section data before rebuilding it.
-     */
-    @Override
-    public void notifyDataSetInvalidated() {
-        if (hasOpenCursor()) {
-            buildSections();
-            mFastScrollObjects = null;
-            mSectionList.clear();
-        }
-        super.notifyDataSetInvalidated();
-    }
-
-    /**
-     * @param listPosition the position of the current item in the list with mSectionMap included
-     * @return If the position is a section it will return the value for the position from the section map.
-     * Otherwise it will convert to the cursor position and return super.
-     */
-    @Override
-    public Object getItem(int listPosition) {
-        if (isSection(listPosition))
-            return mSectionMap.get(listPosition);
-        else
-            return super.getItem(getCursorPositionWithoutSections(listPosition));
-    }
-
-    /**
-     * @param listPosition the position of the current item in the list with mSectionMap included
-     * @return If the position is a section it will return the value for the position from the section map.
-     * Otherwise it will return the _id column value.
-     */
-    @Override
-    public long getItemId(int listPosition) {
-        if (isSection(listPosition))
-            return listPosition;
-        else {
-            int cursorPosition = getCursorPositionWithoutSections(listPosition);
-            Cursor cursor = getCursor();
-            if (hasOpenCursor() && cursor.moveToPosition(cursorPosition)) {
-                return cursor.getLong(cursor.getColumnIndex("_id"));
-            }
-            return NO_CURSOR_POSITION;
-        }
-    }
-
-    /**
-     * @return How many items are in the data set represented by this Adapter.
-     */
-    @Override
-    public int getCount() {
-        return super.getCount() + mSectionMap.size();
-    }
-
-    /**
-     * @param listPosition
-     * @return Get the type of View that will be created by getView(int, View, ViewGroup) for the specified item.
-     */
-    @Override
-    public int getItemViewType(int listPosition) {
-        return isSection(listPosition) ? VIEW_TYPE_SECTION : VIEW_TYPE_ITEM;
-    }
-
-    /**
-     * @return Returns the number of types of Views that will be created by getView(int, View, ViewGroup).
-     */
-    @Override
-    public int getViewTypeCount() {
-        return 2;
-    }
-
-    /**
-     * @return True if cursor is not null and open.
-     * If the cursor is closed a null cursor will be swapped out.
-     */
-    protected boolean hasOpenCursor() {
-        Cursor cursor = getCursor();
-        if (cursor == null || cursor.isClosed()) {
-            swapCursor(null);
-            return false;
-        }
-        return true;
-    }
-
     ////////////////////////////////////
     // Methods for the SectionIndexer
     ////////////////////////////////////
@@ -469,56 +481,5 @@ public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends Vi
             }
         }
         return objects;
-    }
-    ////////////////////////
-    // OnItemClicker
-    ////////////////////////
-
-    /**
-     * This class can only be used in conjunction with the SectionListAdapter. It will error otherwise.
-     */
-    public static abstract class OnSectionItemClickListener<K, V> implements OnItemClickListener {
-
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int listPosition, long id) {
-            ListAdapter listAdapter = ListAdapterUtils.getWrappedAdapter(parent);
-            int adjustedPosition = ListAdapterUtils.getHeaderAdjustedPosition(parent, listPosition);
-
-            if (listAdapter instanceof SectionArrayAdapter) {
-                SectionArrayAdapter<K, V, ViewHolder, ViewHolder> adapter = (SectionArrayAdapter<K, V, ViewHolder, ViewHolder>) listAdapter;
-
-                int sectionPosition = adapter.getSectionPosition(adjustedPosition);
-                int itemPosition = adapter.getItemPosition(adjustedPosition);
-
-                if (adapter.isSection(adjustedPosition)) {
-                    K section = adapter.getSection(sectionPosition);
-                    onSectionClick(parent, view, sectionPosition, section, id);
-                } else {
-                    V item = adapter.getItem(sectionPosition, itemPosition);
-                    onItemInSectionClick(parent, view, sectionPosition, itemPosition, item, id);
-                }
-            } else {
-                throw new IllegalArgumentException("This listener can only be used with the SectionListAdapter.");
-            }
-        }
-
-        /**
-         * @param parent - The AdapterView where the click happened.
-         * @param view - The view within the AdapterView that was clicked (this will be a view provided by the adapter)
-         * @param sectionPosition This is the position within the full list.
-         * @param section The section object which is associated with the view that was clicked.
-         * @param id - The row id of the item that was clicked.
-         */
-        public abstract void onSectionClick(AdapterView<?> parent, View view, int sectionPosition, K section, long id);
-
-        /**
-         * @param parent - The AdapterView where the click happened.
-         * @param view - The view within the AdapterView that was clicked (this will be a view provided by the adapter)
-         * @param sectionPosition This is the position within the full list.
-         * @param itemPosition - This is the position within the full list.
-         * @param item The item object which is associated with the view that was clicked.
-         * @param id - The row id of the item that was clicked.
-         */
-        public abstract void onItemInSectionClick(AdapterView<?> parent, View view, int sectionPosition, int itemPosition, V item, long id);
     }
 }
