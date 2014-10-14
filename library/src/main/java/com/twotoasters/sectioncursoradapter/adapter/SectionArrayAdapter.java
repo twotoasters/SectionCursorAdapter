@@ -47,6 +47,7 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
 
     private boolean mAreSectionsDirty = true;
     private LinkedHashSet<Integer> mSectionsSet = new LinkedHashSet<Integer>();
+    private boolean mStartsWithNullSection;
 
     public SectionArrayAdapter(Context context, int sectionLayoutResId, int itemLayoutResId) {
         init(context, sectionLayoutResId, itemLayoutResId);
@@ -220,6 +221,7 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
         super.notifyDataSetChanged();
         mCount = 0;
         mAreSectionsDirty = true;
+        mStartsWithNullSection = mSectionsMap.containsKey(null);
     }
 
     @Override
@@ -227,6 +229,7 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
         super.notifyDataSetInvalidated();
         mCount = 0;
         mAreSectionsDirty = true;
+        mStartsWithNullSection = mSectionsMap.containsKey(null);
     }
 
     ///////////////////
@@ -265,7 +268,7 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
      * Null will be returned if the section doesn't exist.
      */
     public K getSection(int sectionPosition) {
-        int position = 0;
+        int position = mStartsWithNullSection ? -1 : 0;
         for (K section : mSectionsMap.keySet()) {
             if (position == sectionPosition) {
                 return section;
