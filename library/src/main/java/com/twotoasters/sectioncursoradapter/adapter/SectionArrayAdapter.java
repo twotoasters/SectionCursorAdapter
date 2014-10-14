@@ -137,6 +137,7 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
      * @param listData a list of all the data which section are to be built with.
      */
     public void setDataAndBuildSections(List<V> listData) {
+        if (listData == null) listData = new ArrayList<V>();
         LinkedHashMap<K, List<V>> sectionsMap = new LinkedHashMap<K, List<V>>();
 
         for (V item : listData) {
@@ -154,7 +155,9 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
      *                    Each value in the object array is an item in bindView.
      */
     public void setDataMapWithArray(LinkedHashMap<K, V[]> sectionsMap) {
+        if (sectionsMap == null) sectionsMap = new LinkedHashMap<K, V[]>();
         this.mSectionsMap = new LinkedHashMap<K, List<V>>();
+
         for (K section : sectionsMap.keySet()) {
             this.mSectionsMap.put(section, Arrays.asList(sectionsMap.get(section)));
         }
