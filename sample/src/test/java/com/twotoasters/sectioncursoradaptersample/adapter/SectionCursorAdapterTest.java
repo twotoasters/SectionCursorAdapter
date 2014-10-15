@@ -121,23 +121,23 @@ public class SectionCursorAdapterTest {
     @Test
     public void itShouldGetIndexWithinSections() {
         adapter.setSections(new TreeMap<Integer, Object>(SECTION_MAP));
-        assertThat(adapter.getIndexWithinSections(0)).isEqualTo(0);
-        assertThat(adapter.getIndexWithinSections(1)).isEqualTo(0);
-        assertThat(adapter.getIndexWithinSections(2)).isEqualTo(0);
-        assertThat(adapter.getIndexWithinSections(3)).isEqualTo(1);
-        assertThat(adapter.getIndexWithinSections(4)).isEqualTo(1);
-        assertThat(adapter.getIndexWithinSections(5)).isEqualTo(1);
-        assertThat(adapter.getIndexWithinSections(6)).isEqualTo(2);
-        assertThat(adapter.getIndexWithinSections(7)).isEqualTo(2);
+        assertThat(adapter.getSectionPosition(0)).isEqualTo(0);
+        assertThat(adapter.getSectionPosition(1)).isEqualTo(0);
+        assertThat(adapter.getSectionPosition(2)).isEqualTo(0);
+        assertThat(adapter.getSectionPosition(3)).isEqualTo(1);
+        assertThat(adapter.getSectionPosition(4)).isEqualTo(1);
+        assertThat(adapter.getSectionPosition(5)).isEqualTo(1);
+        assertThat(adapter.getSectionPosition(6)).isEqualTo(2);
+        assertThat(adapter.getSectionPosition(7)).isEqualTo(2);
 
         adapter.setSections(new TreeMap<Integer, Object>(SECTION_MAP_ALT));
-        assertThat(adapter.getIndexWithinSections(0)).isEqualTo(0);
-        assertThat(adapter.getIndexWithinSections(1)).isEqualTo(0);
-        assertThat(adapter.getIndexWithinSections(2)).isEqualTo(0);
-        assertThat(adapter.getIndexWithinSections(3)).isEqualTo(0);
-        assertThat(adapter.getIndexWithinSections(4)).isEqualTo(1);
-        assertThat(adapter.getIndexWithinSections(5)).isEqualTo(2);
-        assertThat(adapter.getIndexWithinSections(6)).isEqualTo(2);
+        assertThat(adapter.getSectionPosition(0)).isEqualTo(0);
+        assertThat(adapter.getSectionPosition(1)).isEqualTo(0);
+        assertThat(adapter.getSectionPosition(2)).isEqualTo(0);
+        assertThat(adapter.getSectionPosition(3)).isEqualTo(0);
+        assertThat(adapter.getSectionPosition(4)).isEqualTo(1);
+        assertThat(adapter.getSectionPosition(5)).isEqualTo(2);
+        assertThat(adapter.getSectionPosition(6)).isEqualTo(2);
     }
 
     @Test
