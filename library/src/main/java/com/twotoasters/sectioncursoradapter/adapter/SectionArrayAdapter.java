@@ -7,14 +7,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ListView;
 import android.widget.SectionIndexer;
 
 import com.twotoasters.sectioncursoradapter.adapter.viewholder.ViewHolder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -530,18 +528,18 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
      */
     @Override
     public int getPositionForSection(int sectionIndex) {
+        if (mStartsWithNullSection && sectionIndex == 0) return 0;
+
         int i = 0;
-        int positionForSection = ListView.INVALID_POSITION;
+        int normalize = mStartsWithNullSection ? 1 : 0;
         for (int listPosition : getSectionListPositions()) {
-            if (i == sectionIndex) {
-                positionForSection = listPosition;
-                break;
+            if ((i + normalize) == sectionIndex) {
+                return listPosition;
             }
             i++;
         }
 
-        return positionForSection != ListView.INVALID_POSITION
-                ? positionForSection : getCount();
+        return getCount();
     }
 
     /**
@@ -562,10 +560,8 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
      */
     @Override
     public int getSectionForPosition(int position) {
-        Object[] objects = getSections(); // the fast scroll section objects
-        int sectionIndex = getItemPosition(position);
-
-        return sectionIndex < objects.length ? sectionIndex : 0;
+        int sectionPosition = getSectionPosition(position) + 1;
+        return sectionPosition > 0 ? sectionPosition : 0;
     }
 
     /**
@@ -584,6 +580,7 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
         if (mFastScrollObjects == null) {
             mFastScrollObjects = getFastScrollDialogLabels();
         }
+
         return mFastScrollObjects;
     }
 
@@ -601,17 +598,21 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
      * the string value will be trimmed according to to length specified in getMaxIndexerLength().
      */
     private Object[] getFastScrollDialogLabels() {
-        Collection<K> sectionsCollection = mSectionsMap.keySet();
-        Object[] objects = sectionsCollection.toArray(new Object[sectionsCollection.size()]);
-        if (VERSION.SDK_INT < VERSION_CODES.KITKAT) {
-            int max = getMaxIndexerLength();
-            for (int i = 0; i < objects.length; i++) {
-                if (objects[i].toString().length() >= max) {
-                    objects[i] = objects[i].toString().substring(0, max);
-                }
+        int sectionCount = mSectionsMap.size();
+        String[] titles = new String[sectionCount];
+
+        int max = VERSION.SDK_INT < VERSION_CODES.KITKAT ? getMaxIndexerLength() : Integer.MAX_VALUE;
+        int i = 0;
+        for (Object object : mSectionsMap.keySet()) {
+            if (object == null) {
+                titles[i] = "";
+            } else if (object.toString().length() >= max) {
+                titles[i] = object.toString().substring(0, max);
+            } else {
+                titles[i] = object.toString();
             }
+            i++;
         }
-        return objects;
+        return titles;
     }
 }
-
