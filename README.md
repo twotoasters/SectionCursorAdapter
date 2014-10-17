@@ -2,6 +2,9 @@
 SectionCursorAdapter adds sections and fast scroll to CursorAdapter as an easily implementable feature.
 A blog post on the implementation rational can be found on [toastdroid.com](http://toastdroid.com/2014/05/09/adding-sections-to-cursoradapter)
 
+## SectionCursorAdapter 2.0
+2.0 adds two new adapters and handles all recycling for you. For reasons which are specified in the 2.0 readme this version will not take over as master but none the less 1.0 is deprecated and it is highly recommended that you use 2.0. [Follow this link to go to the 2.0 Master branch.](https://github.com/twotoasters/SectionCursorAdapter/tree/master-2.0)
+
 ![sections](screenshots/sections.png)      ![dialog](screenshots/dialog.png)
 
 ## Download
