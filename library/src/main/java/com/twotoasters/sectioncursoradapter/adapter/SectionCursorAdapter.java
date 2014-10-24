@@ -15,7 +15,6 @@ import com.twotoasters.sectioncursoradapter.adapter.viewholder.ViewHolder;
 import com.twotoasters.sectioncursoradapter.exception.IllegalCursorMovementException;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -501,16 +500,23 @@ public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends Vi
      * the string value will be trimmed according to to length specified in getMaxIndexerLength().
      */
     private Object[] getFastScrollDialogLabels() {
-        Collection<T> sectionsCollection = mSectionMap.values();
-        Object[] objects = sectionsCollection.toArray(new Object[sectionsCollection.size()]);
-        if (VERSION.SDK_INT < VERSION_CODES.KITKAT) {
-            int max = getMaxIndexerLength();
-            for (int i = 0; i < objects.length; i++) {
-                if (objects[i].toString().length() >= max) {
-                    objects[i] = objects[i].toString().substring(0, max);
-                }
+        if (mSectionMap == null) return new Object[] { };
+
+        int sectionCount = mSectionMap.size();
+        String[] titles = new String[sectionCount];
+
+        int max = VERSION.SDK_INT < VERSION_CODES.KITKAT ? getMaxIndexerLength() : Integer.MAX_VALUE;
+        int i = 0;
+        for (Object object : mSectionMap.values()) {
+            if (object == null) {
+                titles[i] = "";
+            } else if (object.toString().length() >= max) {
+                titles[i] = object.toString().substring(0, max);
+            } else {
+                titles[i] = object.toString();
             }
+            i++;
         }
-        return objects;
+        return titles;
     }
 }

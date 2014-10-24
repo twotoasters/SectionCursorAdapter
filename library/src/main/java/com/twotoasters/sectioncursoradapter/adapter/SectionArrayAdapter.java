@@ -40,7 +40,7 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
 
     int mCount = 0;
     private LayoutInflater mInflater;
-    private LinkedHashMap<K, List<V>> mSectionsMap;
+    private LinkedHashMap<K, List<V>> mSectionMap;
     private Object[] mFastScrollObjects;
 
     private boolean mAreSectionsDirty = true;
@@ -82,7 +82,7 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
 
     @Override
     public int getCount() {
-        if (mCount == 0 && mSectionsMap != null) {
+        if (mCount == 0 && mSectionMap != null) {
             rebuildCount();
         }
         return mCount;
@@ -90,8 +90,8 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
 
     private void rebuildCount() {
         mCount = 0;
-        for (K key : mSectionsMap.keySet()) {
-            List<V> sectionValues = mSectionsMap.get(key);
+        for (K key : mSectionMap.keySet()) {
+            List<V> sectionValues = mSectionMap.get(key);
             if (key != null) {
                 mCount++;
             }
@@ -120,7 +120,7 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
     protected abstract K getSectionFromItem(V item);
 
     /**
-     * This method with call getSectionFromItem to help build the mSectionsMap.
+     * This method with call getSectionFromItem to help build the mSectionMap.
      * <br />
      * <strong>Note:</strong> if your sections are not presorted sections will then be built in random order.
      * @param arrayData an array of all the data which section are to be built with.
@@ -130,7 +130,7 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
     }
 
     /**
-     * This method with call getSectionFromItem to help build the mSectionsMap.
+     * This method with call getSectionFromItem to help build the mSectionMap.
      * <br />
      * <strong>Note:</strong> if your sections are not presorted sections will then be built in random order.
      * @param listData a list of all the data which section are to be built with.
@@ -155,10 +155,10 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
      */
     public void setDataMapWithArray(LinkedHashMap<K, V[]> sectionsMap) {
         if (sectionsMap == null) sectionsMap = new LinkedHashMap<K, V[]>();
-        this.mSectionsMap = new LinkedHashMap<K, List<V>>();
+        this.mSectionMap = new LinkedHashMap<K, List<V>>();
 
         for (K section : sectionsMap.keySet()) {
-            this.mSectionsMap.put(section, Arrays.asList(sectionsMap.get(section)));
+            this.mSectionMap.put(section, Arrays.asList(sectionsMap.get(section)));
         }
         notifyDataSetChanged();
     }
@@ -169,18 +169,18 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
      *                    Each value in the object array is an item in bindView.
      */
     public void setDataMapWithList(LinkedHashMap<K, List<V>> sectionsMap) {
-        this.mSectionsMap = sectionsMap;
+        this.mSectionMap = sectionsMap;
         notifyDataSetChanged();
     }
 
     /**
      * @param sectionsMap The keys are the section in bindSection.
-     *                    This will be added to the existing mSectionsMap or a new one will be created if one doesn't exist.
+     *                    This will be added to the existing mSectionMap or a new one will be created if one doesn't exist.
      */
     public void putAllDataMapWithList(LinkedHashMap<K, List<V>> sectionsMap) {
         if (sectionsMap == null) sectionsMap = new LinkedHashMap<K, List<V>>();
 
-        this.mSectionsMap.putAll(sectionsMap);
+        this.mSectionMap.putAll(sectionsMap);
         notifyDataSetChanged();
     }
 
@@ -190,9 +190,9 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
      * In this case the section will retain it's current position.
      */
     public void putSection(K section, V[] items) {
-        if (mSectionsMap == null) mSectionsMap = new LinkedHashMap<K, List<V>>();
+        if (mSectionMap == null) mSectionMap = new LinkedHashMap<K, List<V>>();
 
-        mSectionsMap.put(section, Arrays.asList(items));
+        mSectionMap.put(section, Arrays.asList(items));
         notifyDataSetChanged();
     }
 
@@ -210,7 +210,7 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
      * @param section the section to be removed.
      */
     public void removeSection(K section) {
-        mSectionsMap.remove(section);
+        mSectionMap.remove(section);
         notifyDataSetChanged();
     }
 
@@ -219,7 +219,7 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
         super.notifyDataSetChanged();
         mCount = 0;
         mAreSectionsDirty = true;
-        mStartsWithNullSection = mSectionsMap.containsKey(null);
+        mStartsWithNullSection = mSectionMap.containsKey(null);
     }
 
     @Override
@@ -227,7 +227,7 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
         super.notifyDataSetInvalidated();
         mCount = 0;
         mAreSectionsDirty = true;
-        mStartsWithNullSection = mSectionsMap.containsKey(null);
+        mStartsWithNullSection = mSectionMap.containsKey(null);
     }
 
     ///////////////////
@@ -238,18 +238,18 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
      * @return all of the positions that sections are at.
      */
     public Set<Integer> getSectionListPositions() {
-        if (mAreSectionsDirty && mSectionsMap != null) {
+        if (mAreSectionsDirty && mSectionMap != null) {
             mSectionsSet.clear();
 
             int position = 0;
-            for (K key : mSectionsMap.keySet()) {
+            for (K key : mSectionMap.keySet()) {
                 // The map can start will a null key so that it doesn't start with a section.
                 if (key != null) {
                     mSectionsSet.add(position);
                     position++;
                 }
-                if (mSectionsMap.get(key) != null) {
-                    position += mSectionsMap.get(key).size();
+                if (mSectionMap.get(key) != null) {
+                    position += mSectionMap.get(key).size();
                 }
             }
             mAreSectionsDirty = false;
@@ -267,7 +267,7 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
      */
     public K getSection(int sectionPosition) {
         int position = mStartsWithNullSection ? -1 : 0;
-        for (K section : mSectionsMap.keySet()) {
+        for (K section : mSectionMap.keySet()) {
             if (position == sectionPosition) {
                 return section;
             }
@@ -282,9 +282,9 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
      */
     public List<V> getSectionList(int sectionPosition) {
         int position = 0;
-        for (K section : mSectionsMap.keySet()) {
+        for (K section : mSectionMap.keySet()) {
             if (position == sectionPosition) {
-                return mSectionsMap.get(section);
+                return mSectionMap.get(section);
             }
             position++;
         }
@@ -296,7 +296,7 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
      * Null will be returned if the section doesn't exist.
      */
     public List<V> getSectionList(K section) {
-        return mSectionsMap.get(section);
+        return mSectionMap.get(section);
     }
 
     /**
@@ -309,7 +309,7 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
             return null;
         }
         K key = getSection(sectionPosition);
-        List<V> sectionValues = mSectionsMap.get(key);
+        List<V> sectionValues = mSectionMap.get(key);
         // We want to just return null if they are out of bounds.
         if (itemPosition < sectionValues.size()) {
             return sectionValues.get(itemPosition);
@@ -324,7 +324,7 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
      */
     @Override
     public Object getItem(int listPosition) {
-        if (mSectionsMap == null || listPosition >= getCount()) {
+        if (mSectionMap == null || listPosition >= getCount()) {
             return null;
         }
 
@@ -415,7 +415,7 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
      *         If this section does not exist, POSITION_NOT_FOUND will be returned.
      */
     public int getSectionSize(K section) {
-        List<V> items = mSectionsMap.get(section);
+        List<V> items = mSectionMap.get(section);
         if (items !=  null) {
             return items.size();
         }
@@ -598,12 +598,14 @@ public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends 
      * the string value will be trimmed according to to length specified in getMaxIndexerLength().
      */
     private Object[] getFastScrollDialogLabels() {
-        int sectionCount = mSectionsMap.size();
+        if (mSectionMap == null) return new Object[] { };
+
+        int sectionCount = mSectionMap.size();
         String[] titles = new String[sectionCount];
 
         int max = VERSION.SDK_INT < VERSION_CODES.KITKAT ? getMaxIndexerLength() : Integer.MAX_VALUE;
         int i = 0;
-        for (Object object : mSectionsMap.keySet()) {
+        for (Object object : mSectionMap.keySet()) {
             if (object == null) {
                 titles[i] = "";
             } else if (object.toString().length() >= max) {
