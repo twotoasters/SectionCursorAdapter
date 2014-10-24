@@ -34,13 +34,17 @@ android {
     sourceSets {
         androidTest.setRoot('src/test')
     }
+
+    lintOptions {
+        disable 'InvalidPackage' // For okhttp. Silly SquareUp.
+    }
 }
 
 apply plugin: 'android-unit-test'
 
 dependencies {
     compile project(':library')
-    compile 'com.squareup.okhttp:okhttp:2.0.+'
+    compile ('com.squareup.okhttp:okhttp:2.0.+')
     compile 'com.squareup.okhttp:okhttp-urlconnection:2.0.+'
     compile 'com.squareup.picasso:picasso:2.3.+'
     compile 'com.android.support:appcompat-v7:21.+'
