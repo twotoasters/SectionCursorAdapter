@@ -5,12 +5,14 @@ import android.database.Cursor;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.support.v4.widget.CursorAdapter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SectionIndexer;
 
 import com.twotoasters.sectioncursoradapter.adapter.viewholder.ViewHolder;
+import com.twotoasters.sectioncursoradapter.exception.IllegalCursorMovementException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,6 +29,10 @@ import java.util.TreeMap;
  * @param <H> ViewHolder type for items.
  */
 public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends ViewHolder>  extends CursorAdapter implements SectionIndexer {
+
+    private static final String ERROR_ILLEGAL_STATE = "IllegalStateException during build sections. "
+            + "More then likely your cursor has been disconnected from the database, so your cursor will be set to null. "
+            + "In most cases your content observer has already been notified of a database change and SectionCursorAdapter should get a new cursor shortly.";
 
     public static final int NO_CURSOR_POSITION = -99; // used when mapping section list position to cursor position
 
@@ -83,7 +89,14 @@ public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends Vi
         if (hasOpenCursor()) {
             Cursor cursor = getCursor();
             cursor.moveToPosition(-1);
-            mSectionMap = buildSections(cursor);
+            try {
+                mSectionMap = buildSections(cursor);
+            } catch (IllegalStateException e) {
+                Log.w(SectionCursorAdapter.class.getName(), ERROR_ILLEGAL_STATE, e);
+                swapCursor(null);
+                mSectionMap = new TreeMap<Integer, T>();
+                return;
+            }
             if (mSectionMap == null) {
                 mSectionMap = new TreeMap<Integer, T>();
             }
@@ -95,13 +108,13 @@ public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends Vi
      * @return A map whose keys are the position at which a section is and values are an object
      * which will be passed to newSectionView and bindSectionView
      */
-    protected SortedMap<Integer, T> buildSections(Cursor cursor) {
+    protected SortedMap<Integer, T> buildSections(Cursor cursor) throws IllegalStateException {
         TreeMap<Integer, T> sections = new TreeMap<Integer, T>();
         int cursorPosition = 0;
         while (hasOpenCursor() && cursor.moveToNext()) {
             T section = getSectionFromCursor(cursor);
             if (cursor.getPosition() != cursorPosition)
-                throw new IllegalStateException("Do no move the cursor's position in getSectionFromCursor.");
+                throw new IllegalCursorMovementException("Do no move the cursor's position in getSectionFromCursor.");
             if (!sections.containsValue(section))
                 sections.put(cursorPosition + sections.size(), section);
             cursorPosition++;
@@ -115,7 +128,7 @@ public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends Vi
      * @return the section from the cursor at its current position.
      * This object will be passed to newSectionView and bindSectionView.
      */
-    protected abstract T getSectionFromCursor(Cursor cursor);
+    protected abstract T getSectionFromCursor(Cursor cursor) throws IllegalStateException;
 
     ////////////////////////////////////////
     // Implemented Abstract/Overrode methods
