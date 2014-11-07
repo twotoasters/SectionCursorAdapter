@@ -23,6 +23,12 @@ android {
         versionCode Integer.parseInt(VERSION_CODE)
         versionName VERSION_NAME
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
     buildTypes {
         release {
             runProguard false
