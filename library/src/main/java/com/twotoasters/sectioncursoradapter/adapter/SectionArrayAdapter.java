@@ -3,13 +3,12 @@ package com.twotoasters.sectioncursoradapter.adapter;
 import android.content.Context;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
+import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.SectionIndexer;
-
-import com.twotoasters.sectioncursoradapter.adapter.viewholder.SViewHolder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +26,7 @@ import java.util.Set;
  * @param <S> ViewHolder type for sections.
  * @param <H> ViewHolder type for items.
  */
-public abstract class SectionArrayAdapter<K, V, S extends SViewHolder, H extends SViewHolder> extends BaseAdapter implements SectionIndexer {
+public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends ViewHolder> extends BaseAdapter implements SectionIndexer {
 
     public static final int POSITION_NOT_FOUND = -1;
 

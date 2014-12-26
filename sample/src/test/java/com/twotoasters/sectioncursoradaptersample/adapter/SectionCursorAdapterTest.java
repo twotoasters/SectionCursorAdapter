@@ -2,6 +2,7 @@ package com.twotoasters.sectioncursoradaptersample.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -20,7 +21,7 @@ import org.robolectric.RobolectricTestRunner;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
@@ -107,7 +108,7 @@ public class SectionCursorAdapterTest {
 
     @Test
     public void itShouldCheckIfSection() {
-        adapter.setSections(new TreeMap<Integer, Object>(SECTION_MAP));
+        adapter.setSections(new TreeMap<>(SECTION_MAP));
         assertThat(adapter.isSection(0)).isTrue();
         assertThat(adapter.isSection(1)).isFalse();
         assertThat(adapter.isSection(2)).isFalse();
@@ -120,7 +121,7 @@ public class SectionCursorAdapterTest {
 
     @Test
     public void itShouldGetIndexWithinSections() {
-        adapter.setSections(new TreeMap<Integer, Object>(SECTION_MAP));
+        adapter.setSections(new TreeMap<>(SECTION_MAP));
         assertThat(adapter.getSectionPosition(0)).isEqualTo(0);
         assertThat(adapter.getSectionPosition(1)).isEqualTo(0);
         assertThat(adapter.getSectionPosition(2)).isEqualTo(0);
@@ -130,7 +131,7 @@ public class SectionCursorAdapterTest {
         assertThat(adapter.getSectionPosition(6)).isEqualTo(2);
         assertThat(adapter.getSectionPosition(7)).isEqualTo(2);
 
-        adapter.setSections(new TreeMap<Integer, Object>(SECTION_MAP_ALT));
+        adapter.setSections(new TreeMap<>(SECTION_MAP_ALT));
         assertThat(adapter.getSectionPosition(0)).isEqualTo(0);
         assertThat(adapter.getSectionPosition(1)).isEqualTo(0);
         assertThat(adapter.getSectionPosition(2)).isEqualTo(0);
@@ -142,7 +143,7 @@ public class SectionCursorAdapterTest {
 
     @Test
     public void itShouldGetListPositionWithoutSections() {
-        adapter.setSections(new TreeMap<Integer, Object>(SECTION_MAP));
+        adapter.setSections(new TreeMap<>(SECTION_MAP));
         assertThat(adapter.getCursorPositionWithoutSections(0)).isEqualTo(SectionCursorAdapter.NO_CURSOR_POSITION);
         assertThat(adapter.getCursorPositionWithoutSections(1)).isEqualTo(0);
         assertThat(adapter.getCursorPositionWithoutSections(2)).isEqualTo(1);
@@ -152,7 +153,7 @@ public class SectionCursorAdapterTest {
         assertThat(adapter.getCursorPositionWithoutSections(6)).isEqualTo(SectionCursorAdapter.NO_CURSOR_POSITION);
         assertThat(adapter.getCursorPositionWithoutSections(7)).isEqualTo(4);
 
-        adapter.setSections(new TreeMap<Integer, Object>(SECTION_MAP_ALT));
+        adapter.setSections(new TreeMap<>(SECTION_MAP_ALT));
         assertThat(adapter.getCursorPositionWithoutSections(0)).isEqualTo(0);
         assertThat(adapter.getCursorPositionWithoutSections(1)).isEqualTo(1);
         assertThat(adapter.getCursorPositionWithoutSections(2)).isEqualTo(SectionCursorAdapter.NO_CURSOR_POSITION);
@@ -249,7 +250,7 @@ public class SectionCursorAdapterTest {
         }
 
         @Override
-        protected void bindSectionViewHolder(int position, SViewHolder sectionViewHolder, ViewGroup parent, Object section) {
+        protected void bindSectionViewHolder(int position, ViewHolder sectionViewHolder, ViewGroup parent, Object section) {
 
         }
 
@@ -265,7 +266,7 @@ public class SectionCursorAdapterTest {
         }
 
         @Override
-        protected void bindItemViewHolder(SViewHolder itemViewHolder, Cursor cursor, ViewGroup parent) {
+        protected void bindItemViewHolder(ViewHolder itemViewHolder, Cursor cursor, ViewGroup parent) {
 
         }
 

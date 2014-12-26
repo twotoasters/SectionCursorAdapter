@@ -5,13 +5,13 @@ import android.database.Cursor;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.support.v4.widget.CursorAdapter;
+import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SectionIndexer;
 
-import com.twotoasters.sectioncursoradapter.adapter.viewholder.SViewHolder;
 import com.twotoasters.sectioncursoradapter.exception.IllegalCursorMovementException;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ import java.util.TreeMap;
  * @param <S> ViewHolder type for sections.
  * @param <H> ViewHolder type for items.
  */
-public abstract class SectionCursorAdapter<T, S extends SViewHolder, H extends SViewHolder>  extends CursorAdapter implements SectionIndexer {
+public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends ViewHolder>  extends CursorAdapter implements SectionIndexer {
 
     private static final String ERROR_ILLEGAL_STATE = "IllegalStateException during build sections. "
             + "More then likely your cursor has been disconnected from the database, so your cursor will be set to null. "

@@ -54,7 +54,7 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:21.+'
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
-    androidTestCompile 'com.squareup.assertj:assertj-android:1.0.0'
+    testCompile 'com.squareup.assertj:assertj-android:1.0.0'
     testCompile 'junit:junit:4.10'
     testCompile 'org.mockito:mockito-all:1.9.5'
     testCompile 'org.robolectric:robolectric:2.4'
