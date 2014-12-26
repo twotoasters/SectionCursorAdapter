@@ -5,7 +5,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListAdapter;
 
-import com.twotoasters.sectioncursoradapter.adapter.viewholder.ViewHolder;
+import com.twotoasters.sectioncursoradapter.adapter.viewholder.SViewHolder;
 import com.twotoasters.sectioncursoradapter.util.ListAdapterUtils;
 
 public class ItemClickListeners {
@@ -24,7 +24,7 @@ public class ItemClickListeners {
             int adjustedPosition = ListAdapterUtils.getHeaderAdjustedPosition(parent, position);
 
             if (listAdapter instanceof NonSectioningArrayAdapter && adjustedPosition >= 0) {
-                NonSectioningArrayAdapter<T, ViewHolder> adapter = (NonSectioningArrayAdapter<T, ViewHolder>) listAdapter;
+                NonSectioningArrayAdapter<T, SViewHolder> adapter = (NonSectioningArrayAdapter<T, SViewHolder>) listAdapter;
 
                 T item = adapter.getItem(adjustedPosition);
                 onItemClick(parent, view, adjustedPosition, item, id);
@@ -47,7 +47,7 @@ public class ItemClickListeners {
             int adjustedPosition = ListAdapterUtils.getHeaderAdjustedPosition(parent, listPosition);
 
             if (listAdapter instanceof SectionArrayAdapter) {
-                SectionArrayAdapter<K, V, ViewHolder, ViewHolder> adapter = (SectionArrayAdapter<K, V, ViewHolder, ViewHolder>) listAdapter;
+                SectionArrayAdapter<K, V, SViewHolder, SViewHolder> adapter = (SectionArrayAdapter<K, V, SViewHolder, SViewHolder>) listAdapter;
 
                 int sectionPosition = adapter.getSectionPosition(adjustedPosition);
                 int itemPosition = adapter.getItemPosition(adjustedPosition);
@@ -95,7 +95,7 @@ public class ItemClickListeners {
             int adjustedPosition = ListAdapterUtils.getHeaderAdjustedPosition(parent, listPosition);
 
             if (listAdapter instanceof SectionCursorAdapter) {
-                SectionCursorAdapter<T, ViewHolder, ViewHolder> adapter = (SectionCursorAdapter<T, ViewHolder, ViewHolder>) listAdapter;
+                SectionCursorAdapter<T, SViewHolder, SViewHolder> adapter = (SectionCursorAdapter<T, SViewHolder, SViewHolder>) listAdapter;
 
                 int cursorPosition = adapter.getCursorPositionWithoutSections(adjustedPosition);
 

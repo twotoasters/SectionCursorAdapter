@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.twotoasters.sectioncursoradapter.adapter.SectionCursorAdapter;
-import com.twotoasters.sectioncursoradapter.adapter.viewholder.ViewHolder;
+import com.twotoasters.sectioncursoradapter.adapter.viewholder.SViewHolder;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -76,7 +76,7 @@ public class SectionCursorAdapterTest {
         when(spyAdapter.isSection(anyInt())).thenReturn(true);
         spyAdapter.getView(0, null, new LinearLayout(context));
         verify(spyAdapter).newSectionView(any(ViewGroup.class), any());
-        verify(spyAdapter).bindSectionViewHolder(anyInt(), any(ViewHolder.class), any(ViewGroup.class), anyObject());
+        verify(spyAdapter).bindSectionViewHolder(anyInt(), any(SViewHolder.class), any(ViewGroup.class), anyObject());
     }
 
     @Test
@@ -84,7 +84,7 @@ public class SectionCursorAdapterTest {
         when(spyAdapter.isSection(anyInt())).thenReturn(true);
         spyAdapter.getView(0, new View(context), new LinearLayout(context));
         verify(spyAdapter, never()).newSectionView(any(ViewGroup.class), any());
-        verify(spyAdapter).bindSectionViewHolder(anyInt(), any(ViewHolder.class), any(ViewGroup.class), anyObject());
+        verify(spyAdapter).bindSectionViewHolder(anyInt(), any(SViewHolder.class), any(ViewGroup.class), anyObject());
     }
 
     @Test
@@ -93,7 +93,7 @@ public class SectionCursorAdapterTest {
         when(cursor.moveToPosition(anyInt())).thenReturn(true);
         spyAdapter.getView(0, null, new LinearLayout(context));
         verify(spyAdapter).newItemView(any(Cursor.class), any(ViewGroup.class));
-        verify(spyAdapter).bindItemViewHolder(any(ViewHolder.class), any(Cursor.class), any(ViewGroup.class));
+        verify(spyAdapter).bindItemViewHolder(any(SViewHolder.class), any(Cursor.class), any(ViewGroup.class));
     }
 
     @Test
@@ -102,7 +102,7 @@ public class SectionCursorAdapterTest {
         when(cursor.moveToPosition(anyInt())).thenReturn(true);
         spyAdapter.getView(0, new View(context), new LinearLayout(context));
         verify(spyAdapter, never()).newItemView(any(Cursor.class), any(ViewGroup.class));
-        verify(spyAdapter).bindItemViewHolder(any(ViewHolder.class), any(Cursor.class), any(ViewGroup.class));
+        verify(spyAdapter).bindItemViewHolder(any(SViewHolder.class), any(Cursor.class), any(ViewGroup.class));
     }
 
     @Test
@@ -243,13 +243,13 @@ public class SectionCursorAdapterTest {
         }
 
         @Override
-        protected ViewHolder createSectionViewHolder(View sectionView, Object section) {
+        protected SViewHolder createSectionViewHolder(View sectionView, Object section) {
             // Won't be called.
             throw new IllegalStateException("This should not be call in the test adapter");
         }
 
         @Override
-        protected void bindSectionViewHolder(int position, ViewHolder sectionViewHolder, ViewGroup parent, Object section) {
+        protected void bindSectionViewHolder(int position, SViewHolder sectionViewHolder, ViewGroup parent, Object section) {
 
         }
 
@@ -259,13 +259,13 @@ public class SectionCursorAdapterTest {
         }
 
         @Override
-        protected ViewHolder createItemViewHolder(Cursor cursor, View itemView) {
+        protected SViewHolder createItemViewHolder(Cursor cursor, View itemView) {
             // Won't be called.
             throw new IllegalStateException("This should not be call in the test adapter");
         }
 
         @Override
-        protected void bindItemViewHolder(ViewHolder itemViewHolder, Cursor cursor, ViewGroup parent) {
+        protected void bindItemViewHolder(SViewHolder itemViewHolder, Cursor cursor, ViewGroup parent) {
 
         }
 

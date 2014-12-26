@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.SectionIndexer;
 
-import com.twotoasters.sectioncursoradapter.adapter.viewholder.ViewHolder;
+import com.twotoasters.sectioncursoradapter.adapter.viewholder.SViewHolder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +27,7 @@ import java.util.Set;
  * @param <S> ViewHolder type for sections.
  * @param <H> ViewHolder type for items.
  */
-public abstract class SectionArrayAdapter<K, V, S extends ViewHolder, H extends ViewHolder> extends BaseAdapter implements SectionIndexer {
+public abstract class SectionArrayAdapter<K, V, S extends SViewHolder, H extends SViewHolder> extends BaseAdapter implements SectionIndexer {
 
     public static final int POSITION_NOT_FOUND = -1;
 
