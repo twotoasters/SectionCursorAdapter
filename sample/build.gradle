@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.github.jcandksolutions.gradle:android-unit-test:1.6.1'
+        classpath 'com.github.jcandksolutions.gradle:android-unit-test:2.1.1'
     }
 }
 
@@ -31,7 +31,7 @@ android {
 
     buildTypes {
         release {
-            runProguard false
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
@@ -40,30 +40,28 @@ android {
     sourceSets {
         androidTest.setRoot('src/test')
     }
-
-    lintOptions {
-        disable 'InvalidPackage' // For okhttp. Silly SquareUp.
-    }
 }
 
 apply plugin: 'android-unit-test'
 
 dependencies {
-    compile project(':library')
-    compile ('com.squareup.okhttp:okhttp:2.0.+')
-    compile 'com.squareup.okhttp:okhttp-urlconnection:2.0.+'
-    compile 'com.squareup.picasso:picasso:2.3.+'
+    compile project(':library') // You'll use com.twotoasters.sectionscursoradapter.....
+
+    compile 'com.squareup.okhttp:okhttp:2.1.+'
+    compile 'com.squareup.okhttp:okhttp-urlconnection:2.1.+'
+    compile 'com.squareup.picasso:picasso:2.4.+'
     compile 'com.android.support:appcompat-v7:21.+'
+    compile 'com.android.support:recyclerview-v7:21.+'
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
-    testCompile 'com.squareup:fest-android:1.0.+'
+    androidTestCompile 'com.squareup.assertj:assertj-android:1.0.0'
     testCompile 'junit:junit:4.10'
     testCompile 'org.mockito:mockito-all:1.9.5'
-    testCompile 'org.robolectric:robolectric:2.4-SNAPSHOT'
+    testCompile 'org.robolectric:robolectric:2.4'
 
     // These should mirror the testCompile dependencies above
-    androidTestCompile 'com.squareup:fest-android:1.0.+'
+    androidTestCompile 'com.squareup.assertj:assertj-android:1.0.0'
     androidTestCompile 'junit:junit:4.10'
     androidTestCompile 'org.mockito:mockito-all:1.9.5'
-    androidTestCompile 'org.robolectric:robolectric:2.4-SNAPSHOT'
+    androidTestCompile 'org.robolectric:robolectric:2.4'
 }
