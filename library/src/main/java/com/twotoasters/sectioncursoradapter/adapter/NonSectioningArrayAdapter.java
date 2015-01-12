@@ -6,7 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
-import com.twotoasters.sectioncursoradapter.adapter.viewholder.ViewHolder;
+import com.twotoasters.sectioncursoradapter.adapter.viewholder.SViewHolder;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ import java.util.List;
  * @param <T> the item type your array or list holds.
  * @param <H> the viewHolder type that the list should use.
  */
-public abstract class NonSectioningArrayAdapter<T, H extends ViewHolder> extends ArrayAdapter<T> {
+public abstract class NonSectioningArrayAdapter<T, H extends SViewHolder> extends ArrayAdapter<T> {
 
     private LayoutInflater mInflater;
     private int mResourceId;

@@ -1,11 +1,11 @@
 package com.twotoasters.sectioncursoradaptersample.adapter;
 
 import android.content.Context;
+import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.twotoasters.sectioncursoradapter.adapter.SectionArrayAdapter;
-import com.twotoasters.sectioncursoradapter.adapter.viewholder.ViewHolder;
 import com.twotoasters.sectioncursoradaptersample.SampleApp;
 
 import org.junit.Before;
@@ -15,7 +15,7 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.util.LinkedHashMap;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
 public class SectionAdapterTest {

@@ -2,12 +2,13 @@ package com.twotoasters.sectioncursoradaptersample.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.twotoasters.sectioncursoradapter.adapter.SectionCursorAdapter;
-import com.twotoasters.sectioncursoradapter.adapter.viewholder.ViewHolder;
+import com.twotoasters.sectioncursoradapter.adapter.viewholder.SViewHolder;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +21,7 @@ import org.robolectric.RobolectricTestRunner;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
@@ -76,7 +77,7 @@ public class SectionCursorAdapterTest {
         when(spyAdapter.isSection(anyInt())).thenReturn(true);
         spyAdapter.getView(0, null, new LinearLayout(context));
         verify(spyAdapter).newSectionView(any(ViewGroup.class), any());
-        verify(spyAdapter).bindSectionViewHolder(anyInt(), any(ViewHolder.class), any(ViewGroup.class), anyObject());
+        verify(spyAdapter).bindSectionViewHolder(anyInt(), any(SViewHolder.class), any(ViewGroup.class), anyObject());
     }
 
     @Test
@@ -84,7 +85,7 @@ public class SectionCursorAdapterTest {
         when(spyAdapter.isSection(anyInt())).thenReturn(true);
         spyAdapter.getView(0, new View(context), new LinearLayout(context));
         verify(spyAdapter, never()).newSectionView(any(ViewGroup.class), any());
-        verify(spyAdapter).bindSectionViewHolder(anyInt(), any(ViewHolder.class), any(ViewGroup.class), anyObject());
+        verify(spyAdapter).bindSectionViewHolder(anyInt(), any(SViewHolder.class), any(ViewGroup.class), anyObject());
     }
 
     @Test
@@ -93,7 +94,7 @@ public class SectionCursorAdapterTest {
         when(cursor.moveToPosition(anyInt())).thenReturn(true);
         spyAdapter.getView(0, null, new LinearLayout(context));
         verify(spyAdapter).newItemView(any(Cursor.class), any(ViewGroup.class));
-        verify(spyAdapter).bindItemViewHolder(any(ViewHolder.class), any(Cursor.class), any(ViewGroup.class));
+        verify(spyAdapter).bindItemViewHolder(any(SViewHolder.class), any(Cursor.class), any(ViewGroup.class));
     }
 
     @Test
@@ -102,12 +103,12 @@ public class SectionCursorAdapterTest {
         when(cursor.moveToPosition(anyInt())).thenReturn(true);
         spyAdapter.getView(0, new View(context), new LinearLayout(context));
         verify(spyAdapter, never()).newItemView(any(Cursor.class), any(ViewGroup.class));
-        verify(spyAdapter).bindItemViewHolder(any(ViewHolder.class), any(Cursor.class), any(ViewGroup.class));
+        verify(spyAdapter).bindItemViewHolder(any(SViewHolder.class), any(Cursor.class), any(ViewGroup.class));
     }
 
     @Test
     public void itShouldCheckIfSection() {
-        adapter.setSections(new TreeMap<Integer, Object>(SECTION_MAP));
+        adapter.setSections(new TreeMap<>(SECTION_MAP));
         assertThat(adapter.isSection(0)).isTrue();
         assertThat(adapter.isSection(1)).isFalse();
         assertThat(adapter.isSection(2)).isFalse();
@@ -120,7 +121,7 @@ public class SectionCursorAdapterTest {
 
     @Test
     public void itShouldGetIndexWithinSections() {
-        adapter.setSections(new TreeMap<Integer, Object>(SECTION_MAP));
+        adapter.setSections(new TreeMap<>(SECTION_MAP));
         assertThat(adapter.getSectionPosition(0)).isEqualTo(0);
         assertThat(adapter.getSectionPosition(1)).isEqualTo(0);
         assertThat(adapter.getSectionPosition(2)).isEqualTo(0);
@@ -130,7 +131,7 @@ public class SectionCursorAdapterTest {
         assertThat(adapter.getSectionPosition(6)).isEqualTo(2);
         assertThat(adapter.getSectionPosition(7)).isEqualTo(2);
 
-        adapter.setSections(new TreeMap<Integer, Object>(SECTION_MAP_ALT));
+        adapter.setSections(new TreeMap<>(SECTION_MAP_ALT));
         assertThat(adapter.getSectionPosition(0)).isEqualTo(0);
         assertThat(adapter.getSectionPosition(1)).isEqualTo(0);
         assertThat(adapter.getSectionPosition(2)).isEqualTo(0);
@@ -142,7 +143,7 @@ public class SectionCursorAdapterTest {
 
     @Test
     public void itShouldGetListPositionWithoutSections() {
-        adapter.setSections(new TreeMap<Integer, Object>(SECTION_MAP));
+        adapter.setSections(new TreeMap<>(SECTION_MAP));
         assertThat(adapter.getCursorPositionWithoutSections(0)).isEqualTo(SectionCursorAdapter.NO_CURSOR_POSITION);
         assertThat(adapter.getCursorPositionWithoutSections(1)).isEqualTo(0);
         assertThat(adapter.getCursorPositionWithoutSections(2)).isEqualTo(1);
@@ -152,7 +153,7 @@ public class SectionCursorAdapterTest {
         assertThat(adapter.getCursorPositionWithoutSections(6)).isEqualTo(SectionCursorAdapter.NO_CURSOR_POSITION);
         assertThat(adapter.getCursorPositionWithoutSections(7)).isEqualTo(4);
 
-        adapter.setSections(new TreeMap<Integer, Object>(SECTION_MAP_ALT));
+        adapter.setSections(new TreeMap<>(SECTION_MAP_ALT));
         assertThat(adapter.getCursorPositionWithoutSections(0)).isEqualTo(0);
         assertThat(adapter.getCursorPositionWithoutSections(1)).isEqualTo(1);
         assertThat(adapter.getCursorPositionWithoutSections(2)).isEqualTo(SectionCursorAdapter.NO_CURSOR_POSITION);
@@ -243,7 +244,7 @@ public class SectionCursorAdapterTest {
         }
 
         @Override
-        protected ViewHolder createSectionViewHolder(View sectionView, Object section) {
+        protected SViewHolder createSectionViewHolder(View sectionView, Object section) {
             // Won't be called.
             throw new IllegalStateException("This should not be call in the test adapter");
         }
@@ -259,7 +260,7 @@ public class SectionCursorAdapterTest {
         }
 
         @Override
-        protected ViewHolder createItemViewHolder(Cursor cursor, View itemView) {
+        protected SViewHolder createItemViewHolder(Cursor cursor, View itemView) {
             // Won't be called.
             throw new IllegalStateException("This should not be call in the test adapter");
         }

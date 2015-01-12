@@ -5,10 +5,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
-import com.twotoasters.sectioncursoradapter.adapter.viewholder.ViewHolder;
+import com.twotoasters.sectioncursoradapter.adapter.viewholder.SViewHolder;
 import com.twotoasters.sectioncursoradaptersample.R;
 
-public class ItemViewHolder extends ViewHolder{
+public class ItemViewHolder extends SViewHolder {
     public final TextView txtName;
     public final TextView txtJob;
     public final ImageView imgToaster;

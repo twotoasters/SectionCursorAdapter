@@ -58,7 +58,7 @@ public class ToasterAdapter extends SectionCursorAdapter<String, SectionViewHold
         itemViewHolder.txtName.setText(toaster.name);
         itemViewHolder.txtJob.setText(toaster.jobDescription);
 
-        Context context = itemViewHolder.rootView.getContext();
+        Context context = itemViewHolder.itemView.getContext();
         Picasso.with(context).load(toaster.imageUrl)
                 .error(R.drawable.toaster_backup).transform(mToasterTrans)
                 .into(itemViewHolder.imgToaster);

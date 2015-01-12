@@ -3,13 +3,12 @@ package com.twotoasters.sectioncursoradapter.adapter;
 import android.content.Context;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
+import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.SectionIndexer;
-
-import com.twotoasters.sectioncursoradapter.adapter.viewholder.ViewHolder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
