@@ -11,32 +11,6 @@ import com.twotoasters.sectioncursoradapter.util.ListAdapterUtils;
 public class ItemClickListeners {
 
     /**
-     * This is a convenience class. onItemClick will hand through the item for the position clicked.
-     * Note: this adjusts the position param and comes through with header positions removed.
-     * As such this will not work to receive header clicks.
-     */
-    public abstract static class NonSectioningOnItemClickListener<T> implements OnItemClickListener {
-
-        @Override
-        @Deprecated
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            ListAdapter listAdapter = ListAdapterUtils.getWrappedAdapter(parent);
-            int adjustedPosition = ListAdapterUtils.getHeaderAdjustedPosition(parent, position);
-
-            if (listAdapter instanceof NonSectioningArrayAdapter && adjustedPosition >= 0) {
-                NonSectioningArrayAdapter<T, SViewHolder> adapter = (NonSectioningArrayAdapter<T, SViewHolder>) listAdapter;
-
-                T item = adapter.getItem(adjustedPosition);
-                onItemClick(parent, view, adjustedPosition, item, id);
-            } else if (adjustedPosition >= 0) {
-                throw new IllegalArgumentException("This listener can only be used with the UscArrayAdapter.");
-            }
-        }
-
-        protected abstract void onItemClick(AdapterView<?> parent, View view, int position, T item, long id);
-    }
-
-    /**
      * This class can only be used in conjunction with the SectionArrayAdapter. It will error otherwise.
      */
     public static abstract class SectionArrayOnItemClickListener<K, V> implements OnItemClickListener {
