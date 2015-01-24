@@ -2,15 +2,12 @@ package com.twotoasters.sectioncursoradapter.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
-import android.support.v4.widget.CursorAdapter;
+import android.support.v7.widget.RecyclerView.AdapterDataObserver;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.SectionIndexer;
 
 import com.twotoasters.sectioncursoradapter.exception.IllegalCursorMovementException;
 
@@ -27,7 +24,7 @@ import java.util.TreeMap;
  * @param <S> ViewHolder type for sections.
  * @param <H> ViewHolder type for items.
  */
-public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends ViewHolder>  extends CursorAdapter implements SectionIndexer {
+public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends ViewHolder>  extends NonSectioningCursorAdapter {
 
     private static final String ERROR_ILLEGAL_STATE = "IllegalStateException during build sections. "
             + "More then likely your cursor has been disconnected from the database, so your cursor will be set to null. "
@@ -41,6 +38,11 @@ public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends Vi
     private int mSectionLayoutResId;
     private int mItemLayoutResId;
 
+    /**
+     * You can no longer override notifyDataSetChanged() so an observer has to be registered instead.
+     */
+    private AdapterDataObserver observer;
+
     protected SortedMap<Integer, T> mSectionMap = new TreeMap<Integer, T>(); // should not be null
     ArrayList<Integer> mSectionList = new ArrayList<Integer>();
     private Object[] mFastScrollObjects;
@@ -48,22 +50,25 @@ public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends Vi
     private LayoutInflater mLayoutInflater;
 
     public SectionCursorAdapter(Context context, Cursor cursor, int flags, int sectionLayoutResId, int itemLayoutResId) {
-        super(context, cursor, flags);
+        super(context, cursor, flags, 0);
         init(context, null, sectionLayoutResId, itemLayoutResId);
     }
 
     protected SectionCursorAdapter(Context context, Cursor c, boolean autoRequery, int sectionLayoutResId, int itemLayoutResId, SortedMap<Integer, T> sections) {
-        super(context, c, autoRequery);
+        super(context, c, autoRequery, 0);
         init(context, sections, sectionLayoutResId, itemLayoutResId);
     }
 
     @Deprecated
     public SectionCursorAdapter(Context context, Cursor cursor, int sectionLayoutResId, int itemLayoutResId) {
-        super(context, cursor);
+        super(context, cursor, 0);
         init(context, null, sectionLayoutResId, itemLayoutResId);
     }
 
     private void init(Context context, SortedMap<Integer, T> sections, int sectionLayoutResId, int itemLayoutResId) {
+        observer = new SectionCursorObserver();
+        registerAdapterDataObserver(observer);
+
         this.mSectionLayoutResId = sectionLayoutResId;
         this.mItemLayoutResId = itemLayoutResId;
         mLayoutInflater = LayoutInflater.from(context);
@@ -133,20 +138,13 @@ public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends Vi
     // Implemented Abstract/Overrode methods
     ////////////////////////////////////////
 
+
+    @Override
     /**
      * @return How many items are in the data set represented by this Adapter.
      */
-    @Override
-    public int getCount() {
-        return super.getCount() + mSectionMap.size();
-    }
-
-    /**
-     * @return Returns the number of types of Views that will be created by getView(int, View, ViewGroup).
-     */
-    @Override
-    public int getViewTypeCount() {
-        return 2;
+    public int getItemCount() {
+        return super.getItemCount() + mSectionMap.size();
     }
 
     /**
@@ -184,32 +182,6 @@ public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends Vi
     /////////////////
     // Managing Data
     /////////////////
-
-    /**
-     * Clears out all section data before rebuilding it.
-     */
-    @Override
-    public void notifyDataSetChanged() {
-        if (hasOpenCursor()) {
-            buildSections();
-            mFastScrollObjects = null;
-            mSectionList.clear();
-        }
-        super.notifyDataSetChanged();
-    }
-
-    /**
-     * Clears out all section data before rebuilding it.
-     */
-    @Override
-    public void notifyDataSetInvalidated() {
-        if (hasOpenCursor()) {
-            buildSections();
-            mFastScrollObjects = null;
-            mSectionList.clear();
-        }
-        super.notifyDataSetInvalidated();
-    }
 
     /**
      * @return True if cursor is not null and open.
@@ -316,207 +288,69 @@ public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends Vi
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        boolean isSection = isSection(position);
-        Cursor cursor = getCursor();
-        View view;
+    protected final View onNewView(ViewGroup parent, int viewType) {
+        if (viewType == VIEW_TYPE_SECTION) {
+            return onNewSectionView(parent);
+        } else {
+            return onNewItemView(parent);
+        }
+    }
 
-        if (!isSection) {
+    protected View onNewSectionView(ViewGroup parent) {
+        return getInflater().inflate(mSectionLayoutResId, parent, false);
+    }
+
+    protected View onNewItemView(ViewGroup parent) {
+        return getInflater().inflate(mItemLayoutResId, parent, false);
+    }
+
+    @Override
+    protected final ViewHolder onCreateViewHolder(View view, ViewGroup parent, int viewType) {
+        if (viewType == VIEW_TYPE_SECTION) {
+            return onCreateSectionViewHolder(view, parent);
+        }
+        return onCreateItemViewHolder(view, parent, viewType);
+    }
+
+    @Override
+    public final void onBindViewHolder(ViewHolder holder, int position) {
+        if (isSection(position)) {
+            T section = mSectionMap.get(position);
+            onBindSectionViewHolder((S) holder, position, section);
+        } else {
             int newPosition = getCursorPositionWithoutSections(position);
-            if (!hasOpenCursor()) {
-                // This only happens when the scroll is super fast and someone backs out.
-                return new View(parent.getContext());
-            } else if (!cursor.moveToPosition(newPosition)) {
+            Cursor cursor = getCursor();
+            if (!cursor.moveToPosition(newPosition)) {
                 throw new IllegalStateException("couldn't move cursor to position " + newPosition);
             }
-        }
 
-        if (convertView == null) {
-            view = isSection ? newSectionView(parent, (T) getItem(position))
-                    : newItemView(cursor, parent);
-        } else {
-            view = convertView;
+            onBindItemViewHolder((H) holder, cursor);
         }
-
-        if (isSection) {
-            T section = mSectionMap.get(position);
-            bindSectionViewHolder(position, (S) view.getTag(), parent, section);
-        } else {
-            bindItemViewHolder((H) view.getTag(), cursor, parent);
-        }
-
-        return view;
     }
 
     @Override
-    @Deprecated
-    /**
-     * This method is from the CursorAdapter and will never be called.
-     */
-    public final View newView(Context context, Cursor cursor, ViewGroup parent) {
-        throw new IllegalStateException("This method is not used by " + SectionCursorAdapter.class.getSimpleName());
+    public void onBindViewHolder(ViewHolder holder, int position, Cursor cursor) {
+        throw new IllegalAccessError("Please use onBindItemViewHolder or onBindSectionViewHolder.");
     }
 
-    @Override
-    @Deprecated
-    /**
-     * This method is from the CursorAdapter and will never be called.
-     */
-    public final void bindView(View view, Context context, Cursor cursor) {
-        throw new IllegalStateException("This method is not used by " + SectionCursorAdapter.class.getSimpleName());
-    }
+    protected abstract S onCreateSectionViewHolder(View view, ViewGroup parent);
+    protected abstract void onBindSectionViewHolder(S holder, int position, T section);
+    protected abstract H onCreateItemViewHolder(View view, ViewGroup parent, int viewType);
+    protected abstract void onBindItemViewHolder(H holder, Cursor cursor);
 
-    /**
-     * Override to manually create your views. MAKE SURE YOU TAG A ViewHolder TO THIS VIEW!
-     * If you do not tag a ViewHolder, the bind methods will give you a null ViewHolder.
-     */
-    protected View newSectionView(ViewGroup parent, T section) {
-        View view = getInflater().inflate(mSectionLayoutResId, parent, false);
-        view.setTag(createSectionViewHolder(view, section));
+    private class SectionCursorObserver extends AdapterDataObserver {
 
-        return view;
-    }
-
-    /**
-     * @param sectionView the view which was created for this ViewHolder. There is no need to setTag.
-     * @param section is the item stored in the sorted map for the section header.
-     * @return The newly created section ViewHolder.
-     */
-    protected abstract S createSectionViewHolder(View sectionView, T section);
-
-    /**
-     * @param position
-     * @param section is the item stored in the sorted map for the section header.
-     * @param sectionViewHolder the ViewHolder which should have data bound to. This maybe reused and have old data in it.
-     * @param parent the parent view. Typically a ListView.
-     */
-    protected abstract void bindSectionViewHolder(int position, S sectionViewHolder, ViewGroup parent, T section);
-
-    /**
-     * Override to manually create your views. MAKE SURE YOU TAG A ViewHolder TO THIS VIEW!
-     * If you do not tag a ViewHolder, the bind methods will give you a null ViewHolder.
-     * @param parent
-     */
-    protected View newItemView(Cursor cursor, ViewGroup parent) {
-        View view = getInflater().inflate(mItemLayoutResId, parent, false);
-        view.setTag(createItemViewHolder(cursor, view));
-
-        return view;
-    }
-
-    /**
-     * @param cursor at the correct position for the item.
-     * @param itemView the view which was created for this ViewHolder. There is no need to setTag.
-     * @return the new created item view.
-     */
-    protected abstract H createItemViewHolder(Cursor cursor, View itemView);
-
-    /**
-     * @param itemViewHolder  the ViewHolder which should have data bound to. This maybe reused and have old data in it.
-     * @param parent          the parent view. Typically a ListView.
-     */
-    protected abstract void bindItemViewHolder(H itemViewHolder, Cursor cursor, ViewGroup parent);
-
-    ////////////////////////////////////
-    // Methods for the SectionIndexer
-    ////////////////////////////////////
-
-    /**
-     * Given the index of a section within the array of section objects, returns
-     * the starting position of that section within the adapter.
-     *
-     * If the section's starting position is outside of the adapter bounds, the
-     * position must be clipped to fall within the size of the adapter.
-     *
-     * @param sectionIndex the index of the section within the array of section
-     *            objects
-     * @return the starting position of that section within the adapter,
-     *         constrained to fall within the adapter bounds
-     */
-    @Override
-    public int getPositionForSection(int sectionIndex) {
-        if (mSectionList.size() == 0) {
-            for (Integer key : mSectionMap.keySet()) {
-                mSectionList.add(key);
+        /**
+         * Clears out all section data before rebuilding it.
+         */
+        @Override
+        public void onChanged() {
+            if (hasOpenCursor()) {
+                buildSections();
+                mFastScrollObjects = null;
+                mSectionList.clear();
             }
+            super.onChanged();
         }
-        return sectionIndex < mSectionList.size() ? mSectionList.get(sectionIndex) : getCount();
-    }
-
-    /**
-     * Given a position within the adapter, returns the index of the
-     * corresponding section within the array of section objects.
-     *
-     * If the section index is outside of the section array bounds, the index
-     * must be clipped to fall within the size of the section array.
-     *
-     * For example, consider an indexer where the section at array index 0
-     * starts at adapter position 100. Calling this method with position 10,
-     * which is before the first section, must return index 0.
-     *
-     * @param position the position within the adapter for which to return the
-     *            corresponding section index
-     * @return the index of the corresponding section within the array of
-     *         section objects, constrained to fall within the array bounds
-     */
-    @Override
-    public int getSectionForPosition(int position) {
-        Object[] objects = getSections(); // the fast scroll section objects
-        int sectionIndex = getSectionPosition(position);
-
-        return sectionIndex < objects.length ? sectionIndex : 0;
-    }
-
-    /**
-     * Returns an array of objects representing mSectionMap of the list. The
-     * returned array and its contents should be non-null.
-     *
-     * The list view will call toString() on the objects to get the preview text
-     * to display while scrolling. For example, an adapter may return an array
-     * of Strings representing letters of the alphabet. Or, it may return an
-     * array of objects whose toString() methods return their section titles.
-     *
-     * @return the array of section objects
-     */
-    @Override
-    public Object[] getSections() {
-        if (mFastScrollObjects == null) {
-            mFastScrollObjects = getFastScrollDialogLabels();
-        }
-        return mFastScrollObjects;
-    }
-
-    /**
-     * This only affects SDK < 19.
-     * Override this to control the amount of characters the fast scroll dialog can display.
-     */
-    protected int getMaxIndexerLength() {
-        return 3;
-    }
-
-    /**
-     * @return The values which for the sections which will be shown in the fast scroll dialog.
-     * As the only a max of three letters can fit in this dialog before KitKat,
-     * the string value will be trimmed according to to length specified in getMaxIndexerLength().
-     */
-    private Object[] getFastScrollDialogLabels() {
-        if (mSectionMap == null) return new Object[] { };
-
-        int sectionCount = mSectionMap.size();
-        String[] titles = new String[sectionCount];
-
-        int max = VERSION.SDK_INT < VERSION_CODES.KITKAT ? getMaxIndexerLength() : Integer.MAX_VALUE;
-        int i = 0;
-        for (Object object : mSectionMap.values()) {
-            if (object == null) {
-                titles[i] = "";
-            } else if (object.toString().length() >= max) {
-                titles[i] = object.toString().substring(0, max);
-            } else {
-                titles[i] = object.toString();
-            }
-            i++;
-        }
-        return titles;
     }
 }

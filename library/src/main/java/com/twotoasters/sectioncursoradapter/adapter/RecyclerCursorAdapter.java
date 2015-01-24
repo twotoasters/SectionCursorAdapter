@@ -42,7 +42,7 @@ public abstract class RecyclerCursorAdapter<VH extends ViewHolder> extends Adapt
     // ******** RecyclerAdapter stuff. ******** //
 
     @Override
-    public final void onBindViewHolder(VH holder, int position) {
+    public void onBindViewHolder(VH holder, int position) {
         if (!mDataValid) {
             throw new IllegalStateException("this should only be called when the cursor is valid");
         }
@@ -173,14 +173,6 @@ public abstract class RecyclerCursorAdapter<VH extends ViewHolder> extends Adapt
     public RecyclerCursorAdapter(Context context, Cursor c, int flags) {
         init(context, c, flags);
     }
-    /**
-     * @deprecated Don't use this, use the normal constructor.  This will
-     * be removed in the future.
-     */
-    @Deprecated
-    protected void init(Context context, Cursor c, boolean autoRequery) {
-        init(context, c, autoRequery ? FLAG_AUTO_REQUERY : FLAG_REGISTER_CONTENT_OBSERVER);
-    }
     void init(Context context, Cursor c, int flags) {
         if ((flags & FLAG_AUTO_REQUERY) == FLAG_AUTO_REQUERY) {
             flags |= FLAG_REGISTER_CONTENT_OBSERVER;
@@ -218,6 +210,15 @@ public abstract class RecyclerCursorAdapter<VH extends ViewHolder> extends Adapt
      * @return The set cursor at the new requested position.
      */
     public Cursor getCursorAtPosition(int position) {
+        if (mDataValid && mCursor != null) {
+            mCursor.moveToPosition(position);
+            return mCursor;
+        } else {
+            return null;
+        }
+    }
+
+    public Object getItem(int position) {
         if (mDataValid && mCursor != null) {
             mCursor.moveToPosition(position);
             return mCursor;
@@ -286,6 +287,19 @@ public abstract class RecyclerCursorAdapter<VH extends ViewHolder> extends Adapt
             notifyDataSetChanged();
         }
         return oldCursor;
+    }
+
+    /**
+     * <p>Converts the cursor into a CharSequence. Subclasses should override this
+     * method to convert their results. The default implementation returns an
+     * empty String for null values or the default String representation of
+     * the value.</p>
+     *
+     * @param cursor the cursor to convert to a CharSequence
+     * @return a CharSequence representing the value
+     */
+    public CharSequence convertToString(Cursor cursor) {
+        return cursor == null ? "" : cursor.toString();
     }
 
     /**
