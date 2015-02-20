@@ -88,9 +88,4 @@ public class ToasterAdapter extends SectionCursorAdapter<String, SectionViewHold
             switcher.setOutAnimation(out);
         }
     }
-
-    @Override
-    protected int getMaxIndexerLength() {
-        return 1;
-    }
 }

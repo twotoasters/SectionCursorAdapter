@@ -2,12 +2,15 @@ package com.twotoasters.sectioncursoradapter.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.support.v7.widget.RecyclerView.AdapterDataObserver;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SectionIndexer;
 
 import com.twotoasters.sectioncursoradapter.exception.IllegalCursorMovementException;
 
@@ -24,7 +27,7 @@ import java.util.TreeMap;
  * @param <S> ViewHolder type for sections.
  * @param <H> ViewHolder type for items.
  */
-public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends ViewHolder>  extends NonSectioningCursorAdapter {
+public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends ViewHolder>  extends NonSectioningCursorAdapter implements SectionIndexer {
 
     private static final String ERROR_ILLEGAL_STATE = "IllegalStateException during build sections. "
             + "More then likely your cursor has been disconnected from the database, so your cursor will be set to null. "
@@ -352,5 +355,107 @@ public abstract class SectionCursorAdapter<T, S extends ViewHolder, H extends Vi
             }
             super.onChanged();
         }
+    }
+    ////////////////////////////////////
+    // Methods for the SectionIndexer
+    ////////////////////////////////////
+
+    /**
+     * Given the index of a section within the array of section objects, returns
+     * the starting position of that section within the adapter.
+     *
+     * If the section's starting position is outside of the adapter bounds, the
+     * position must be clipped to fall within the size of the adapter.
+     *
+     * @param sectionIndex the index of the section within the array of section
+     *            objects
+     * @return the starting position of that section within the adapter,
+     *         constrained to fall within the adapter bounds
+     */
+    @Override
+    public int getPositionForSection(int sectionIndex) {
+        if (mSectionList.size() == 0) {
+            for (Integer key : mSectionMap.keySet()) {
+                mSectionList.add(key);
+            }
+        }
+        return sectionIndex < mSectionList.size() ? mSectionList.get(sectionIndex) : getItemCount();
+    }
+
+    /**
+     * Given a position within the adapter, returns the index of the
+     * corresponding section within the array of section objects.
+     *
+     * If the section index is outside of the section array bounds, the index
+     * must be clipped to fall within the size of the section array.
+     *
+     * For example, consider an indexer where the section at array index 0
+     * starts at adapter position 100. Calling this method with position 10,
+     * which is before the first section, must return index 0.
+     *
+     * @param position the position within the adapter for which to return the
+     *            corresponding section index
+     * @return the index of the corresponding section within the array of
+     *         section objects, constrained to fall within the array bounds
+     */
+    @Override
+    public int getSectionForPosition(int position) {
+        Object[] objects = getSections(); // the fast scroll section objects
+        int sectionIndex = getSectionPosition(position);
+
+        return sectionIndex < objects.length ? sectionIndex : 0;
+    }
+
+    /**
+     * Returns an array of objects representing mSectionMap of the list. The
+     * returned array and its contents should be non-null.
+     *
+     * The list view will call toString() on the objects to get the preview text
+     * to display while scrolling. For example, an adapter may return an array
+     * of Strings representing letters of the alphabet. Or, it may return an
+     * array of objects whose toString() methods return their section titles.
+     *
+     * @return the array of section objects
+     */
+    @Override
+    public Object[] getSections() {
+        if (mFastScrollObjects == null) {
+            mFastScrollObjects = getFastScrollDialogLabels();
+        }
+        return mFastScrollObjects;
+    }
+
+    /**
+     * This only affects SDK < 19.
+     * Override this to control the amount of characters the fast scroll dialog can display.
+     */
+    protected int getMaxIndexerLength() {
+        return 3;
+    }
+
+    /**
+     * @return The values which for the sections which will be shown in the fast scroll dialog.
+     * As the only a max of three letters can fit in this dialog before KitKat,
+     * the string value will be trimmed according to to length specified in getMaxIndexerLength().
+     */
+    private Object[] getFastScrollDialogLabels() {
+        if (mSectionMap == null) return new Object[] { };
+
+        int sectionCount = mSectionMap.size();
+        String[] titles = new String[sectionCount];
+
+        int max = VERSION.SDK_INT < VERSION_CODES.KITKAT ? getMaxIndexerLength() : Integer.MAX_VALUE;
+        int i = 0;
+        for (Object object : mSectionMap.values()) {
+            if (object == null) {
+                titles[i] = "";
+            } else if (object.toString().length() >= max) {
+                titles[i] = object.toString().substring(0, max);
+            } else {
+                titles[i] = object.toString();
+            }
+            i++;
+        }
+        return titles;
     }
 }
