@@ -12,7 +12,7 @@ public abstract class NonSectioningCursorAdapter<VH extends ViewHolder> extends 
     private int mLayoutResId;
     private LayoutInflater mInflater;
 
-
+    @Deprecated
     public NonSectioningCursorAdapter(Context context, Cursor c, int layoutResId) {
         super(context, c);
         init(context, layoutResId);

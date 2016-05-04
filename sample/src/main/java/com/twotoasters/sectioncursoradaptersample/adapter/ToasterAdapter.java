@@ -36,22 +36,22 @@ public class ToasterAdapter extends SectionCursorAdapter<String, SectionViewHold
     }
 
     @Override
-    protected SectionViewHolder createSectionViewHolder(View sectionView, String section) {
+    protected SectionViewHolder onCreateSectionViewHolder(View sectionView, ViewGroup parent) {
         return new SectionViewHolder(sectionView);
     }
 
     @Override
-    protected void bindSectionViewHolder(int position, SectionViewHolder sectionViewHolder, ViewGroup parent, String section) {
+    protected void onBindSectionViewHolder(SectionViewHolder sectionViewHolder, int position, String section) {
         sectionViewHolder.textView.setText(section);
     }
 
     @Override
-    protected ItemViewHolder createItemViewHolder(Cursor cursor, View itemView) {
+    protected ItemViewHolder onCreateItemViewHolder(View itemView, ViewGroup parent, int viewType) {
         return new ItemViewHolder(itemView);
     }
 
     @Override
-    protected void bindItemViewHolder(ItemViewHolder itemViewHolder, Cursor cursor, ViewGroup parent) {
+    protected void onBindItemViewHolder(ItemViewHolder itemViewHolder, Cursor cursor) {
         final ToasterModel toaster = new ToasterModel();
         toaster.loadFromCursor(cursor);
 
@@ -86,11 +86,6 @@ public class ToasterAdapter extends SectionCursorAdapter<String, SectionViewHold
             switcher.setDisplayedChild(0);
             switcher.setInAnimation(in);
             switcher.setOutAnimation(out);
-        };
-    }
-
-    @Override
-    protected int getMaxIndexerLength() {
-        return 1;
+        }
     }
 }

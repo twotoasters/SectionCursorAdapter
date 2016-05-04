@@ -8,9 +8,10 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ListView;
 
 import com.activeandroid.content.ContentProvider;
 import com.twotoasters.sectioncursoradaptersample.R;
@@ -29,8 +30,9 @@ public class MainActivity extends ActionBarActivity implements LoaderCallbacks<C
         getSupportActionBar().setTitle(R.string.two_toasters_team);
 
         mAdapter = new ToasterAdapter(this, null);
-        ListView listView = (ListView) findViewById(R.id.listView);
-        listView.setAdapter(mAdapter);
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.listView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(mAdapter);
 
         getSupportLoaderManager().initLoader(0, null, this);
     }
