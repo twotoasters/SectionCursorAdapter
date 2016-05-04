@@ -42,8 +42,6 @@ android {
     }
 }
 
-apply plugin: 'android-unit-test'
-
 dependencies {
     compile project(':library') // You'll use com.twotoasters.sectionscursoradapter.....
 
@@ -53,15 +51,20 @@ dependencies {
     compile 'com.android.support:appcompat-v7:21.+'
     compile 'com.android.support:recyclerview-v7:21.+'
     compile fileTree(dir: 'libs', include: ['*.jar'])
-
-    testCompile 'com.squareup.assertj:assertj-android:1.0.0'
-    testCompile 'junit:junit:4.10'
+    // Testing libs
+    testCompile 'org.assertj:assertj-core:1.7.0'
+    testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-all:1.9.5'
-    testCompile 'org.robolectric:robolectric:2.4'
-
-    // These should mirror the testCompile dependencies above
-    androidTestCompile 'com.squareup.assertj:assertj-android:1.0.0'
-    androidTestCompile 'junit:junit:4.10'
+    testCompile('org.robolectric:robolectric:3.0') {
+        exclude group: 'commons-logging', module: 'commons-logging'
+        exclude group: 'org.apache.httpcomponents', module: 'httpclient'
+    }
+    // Required for auto complete while writing tests
+    androidTestCompile 'org.assertj:assertj-core:1.7.0'
+    androidTestCompile 'junit:junit:4.12'
     androidTestCompile 'org.mockito:mockito-all:1.9.5'
-    androidTestCompile 'org.robolectric:robolectric:2.4'
+    androidTestCompile('org.robolectric:robolectric:3.0') {
+        exclude group: 'commons-logging', module: 'commons-logging'
+        exclude group: 'org.apache.httpcomponents', module: 'httpclient'
+    }
 }

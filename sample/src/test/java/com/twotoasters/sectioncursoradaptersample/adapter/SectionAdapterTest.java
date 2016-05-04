@@ -10,15 +10,12 @@ import com.twotoasters.sectioncursoradaptersample.SampleApp;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import java.util.LinkedHashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(RobolectricTestRunner.class)
-public class SectionAdapterTest {
+public class SectionAdapterTest extends Testable {
 
     private TestAdapter adapter;
 

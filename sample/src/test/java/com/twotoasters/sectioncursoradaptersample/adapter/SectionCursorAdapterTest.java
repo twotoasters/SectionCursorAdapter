@@ -10,11 +10,9 @@ import com.twotoasters.sectioncursoradapter.adapter.viewholder.SViewHolder;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
+import org.robolectric.shadows.ShadowApplication;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -23,8 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-@RunWith(RobolectricTestRunner.class)
-public class SectionCursorAdapterTest {
+public class SectionCursorAdapterTest extends Testable {
 
     private Context context;
 
@@ -60,7 +57,7 @@ public class SectionCursorAdapterTest {
         when(cursor.getPosition()).thenReturn(0);
         when(cursor.getCount()).thenReturn(10);
 
-        context = Robolectric.application;
+        context = ShadowApplication.getInstance().getApplicationContext();
         adapter = new TestAdapter(context, cursor, 0);
         spyAdapter = spy(adapter);
     }
