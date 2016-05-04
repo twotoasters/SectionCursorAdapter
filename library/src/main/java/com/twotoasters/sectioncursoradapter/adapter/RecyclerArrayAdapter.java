@@ -38,7 +38,7 @@ import java.util.List;
 
 /**
  * This was designed off (see lifted from, or completely jacked from) of the android support library's CursorAdapter.
- * If you wish to use a ViewHolder which extends TextViewHolder, then you must override onCreateViewHolder(View view, ViewGroup parent, int viewType).
+ * If you wish to use a ViewHolder which extends TextViewHolder, then you must override onCreateViewHolder().
  *
  * A concrete BaseAdapter that is backed by an array of arbitrary
  * objects.  By default this class expects that the provided resource id references
@@ -57,14 +57,23 @@ public abstract class RecyclerArrayAdapter<T, VH extends TextViewHolder> extends
     @Override
     /**
      * {@inheritDoc}
+     *
+     * This method is finalized. Override onNewView and the other onCreateViewHolder instead of this method.
      */
-    public VH onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = mInflater.inflate(mResource, parent, false);
+    public final VH onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = onNewView(parent, viewType);
         return onCreateViewHolder(view, parent, viewType);
     }
 
     /**
-     * If you are extending TextViewHolder you most override this method.
+     * Override to manually create your views.
+     */
+    protected View onNewView(ViewGroup parent, int viewType) {
+        return getInflater().inflate(mResource, parent, false);
+    }
+
+    /**
+     * If you are extending TextViewHolder you must override this method.
      * @param view which was inflated according to the given resource id in the constructor.
      * @param parent, The ViewGroup into which the new View will be added after it is bound to an adapter position.
      *                More then likely a RecyclerView
@@ -75,10 +84,10 @@ public abstract class RecyclerArrayAdapter<T, VH extends TextViewHolder> extends
         try {
             return (VH) new TextViewHolder(view, mFieldId);
         } catch (ClassCastException e) {
-            Log.e(getClass().getSimpleName(), "You must override onCreateViewHolder(View view, ViewGroup parent, int viewType)" +
+            Log.e(getClass().getSimpleName(), "You must override onCreateViewHolder()" +
                     " if you are extending TextViewHolder");
             throw new IllegalStateException(
-                    getClass().getSimpleName() + " requires onCreateViewHolder(View view, ViewGroup parent, int viewType) to be overridden.", e);
+                    getClass().getSimpleName() + " requires onCreateViewHolder() to be overridden.", e);
         }
     }
 
@@ -87,7 +96,7 @@ public abstract class RecyclerArrayAdapter<T, VH extends TextViewHolder> extends
      * If you override this method you can call super to bind your text.
      * {@inheritDoc}
      */
-    public void onBindViewHolder(VH holder, int position) {
+    public final void onBindViewHolder(VH holder, int position) {
         T item = getItem(position);
         if (item instanceof CharSequence) {
             holder.text.setText((CharSequence)item);
@@ -96,7 +105,28 @@ public abstract class RecyclerArrayAdapter<T, VH extends TextViewHolder> extends
         }
     }
 
+    /**
+     * @return The layout mInflater which should be used for this adapter.
+     */
+    protected LayoutInflater getInflater() {
+        return mInflater;
+    }
+
+    /**
+     * @param id the item of your array item.
+     * @return the array item which contains this id.
+     */
+    public int getItemPositionById(long id) {
+        for (int i = 0; i < getItemCount(); i++) {
+            if (getItemId(i) == id) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
     // ******** ArrayAdapter stuff. ******** //
+
     /**
      * You can no longer override notifyDataSetChanged() so an observer has to be registered instead.
      */
