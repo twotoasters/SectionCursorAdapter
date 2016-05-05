@@ -1,0 +1,24 @@
+language: java
+
+jdk:
+    - oraclejdk7
+
+build:
+
+    pre_ci:
+      # https://hub.docker.com/r/minceman/android/
+        - docker pull minceman/android:latest
+
+    pre_ci_boot:
+        image_name: minceman/android
+        image_tag: latest
+        pull: false
+        options: "-e HOME=/root"
+
+    ci:
+        - mkdir -p shippable/testresults
+        - chmod +x gradlew
+        - ./gradlew testDebug
+
+    post_ci:
+        - cp -r library/build/test-results/* shippable/testresults/
