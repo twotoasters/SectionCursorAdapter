@@ -2,9 +2,6 @@ buildscript {
     repositories {
         mavenCentral()
     }
-    dependencies {
-        classpath 'com.github.jcandksolutions.gradle:android-unit-test:2.1.1'
-    }
 }
 
 apply plugin: 'com.android.application'
@@ -45,11 +42,10 @@ android {
 dependencies {
     compile project(':library') // You'll use com.twotoasters.sectionscursoradapter.....
 
-    compile 'com.squareup.okhttp:okhttp:2.1.+'
-    compile 'com.squareup.okhttp:okhttp-urlconnection:2.1.+'
-    compile 'com.squareup.picasso:picasso:2.4.+'
-    compile 'com.android.support:appcompat-v7:21.+'
-    compile 'com.android.support:recyclerview-v7:21.+'
+    compile 'com.squareup.okhttp:okhttp:2.7.5'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.android.support:appcompat-v7:23.3.0'
+    compile 'com.android.support:recyclerview-v7:23.3.0'
     compile fileTree(dir: 'libs', include: ['*.jar'])
     // Testing libs
     testCompile 'org.assertj:assertj-core:1.7.0'
