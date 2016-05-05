@@ -6,10 +6,6 @@ buildscript {
 
 apply plugin: 'com.android.application'
 
-repositories {
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
-}
-
 android {
     compileSdkVersion Integer.parseInt(ANDROID_BUILD_SDK_VERSION)
     buildToolsVersion ANDROID_BUILD_TOOLS_VERSION
