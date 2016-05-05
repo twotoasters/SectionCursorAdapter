@@ -2,16 +2,9 @@ buildscript {
     repositories {
         mavenCentral()
     }
-    dependencies {
-        classpath 'com.github.jcandksolutions.gradle:android-unit-test:2.1.1'
-    }
 }
 
 apply plugin: 'com.android.application'
-
-repositories {
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
-}
 
 android {
     compileSdkVersion Integer.parseInt(ANDROID_BUILD_SDK_VERSION)
@@ -42,26 +35,28 @@ android {
     }
 }
 
-apply plugin: 'android-unit-test'
-
 dependencies {
     compile project(':library') // You'll use com.twotoasters.sectionscursoradapter.....
 
-    compile 'com.squareup.okhttp:okhttp:2.1.+'
-    compile 'com.squareup.okhttp:okhttp-urlconnection:2.1.+'
-    compile 'com.squareup.picasso:picasso:2.4.+'
-    compile 'com.android.support:appcompat-v7:21.+'
-    compile 'com.android.support:recyclerview-v7:21.+'
+    compile 'com.squareup.okhttp:okhttp:2.7.5'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.android.support:appcompat-v7:23.3.0'
+    compile 'com.android.support:recyclerview-v7:23.3.0'
     compile fileTree(dir: 'libs', include: ['*.jar'])
-
-    testCompile 'com.squareup.assertj:assertj-android:1.0.0'
-    testCompile 'junit:junit:4.10'
+    // Testing libs
+    testCompile 'org.assertj:assertj-core:1.7.0'
+    testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-all:1.9.5'
-    testCompile 'org.robolectric:robolectric:2.4'
-
-    // These should mirror the testCompile dependencies above
-    androidTestCompile 'com.squareup.assertj:assertj-android:1.0.0'
-    androidTestCompile 'junit:junit:4.10'
+    testCompile('org.robolectric:robolectric:3.0') {
+        exclude group: 'commons-logging', module: 'commons-logging'
+        exclude group: 'org.apache.httpcomponents', module: 'httpclient'
+    }
+    // Required for auto complete while writing tests
+    androidTestCompile 'org.assertj:assertj-core:1.7.0'
+    androidTestCompile 'junit:junit:4.12'
     androidTestCompile 'org.mockito:mockito-all:1.9.5'
-    androidTestCompile 'org.robolectric:robolectric:2.4'
+    androidTestCompile('org.robolectric:robolectric:3.0') {
+        exclude group: 'commons-logging', module: 'commons-logging'
+        exclude group: 'org.apache.httpcomponents', module: 'httpclient'
+    }
 }
