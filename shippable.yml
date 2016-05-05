@@ -21,4 +21,4 @@ build:
         - ./gradlew testDebug
 
     post_ci:
-        - cp -r library/build/test-results/* shippable/testresults/
+        - cp -r sample/build/test-results/* shippable/testresults/
