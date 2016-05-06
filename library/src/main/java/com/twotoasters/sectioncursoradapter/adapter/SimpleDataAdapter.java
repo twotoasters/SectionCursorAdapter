@@ -19,7 +19,7 @@ public abstract class SimpleDataAdapter<T, D extends DataHandler<T>, VH extends 
 
     public SimpleDataAdapter(D dataHandler) {
         this.mDataHandler = dataHandler;
-        setHasStableIds(mDataHandler.hasStableIds());
+        if (mDataHandler.hasStableIds()) setHasStableIds(true);
     }
 
     public D getDataHandler() {

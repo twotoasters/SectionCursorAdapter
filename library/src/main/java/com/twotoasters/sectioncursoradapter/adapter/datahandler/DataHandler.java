@@ -12,6 +12,10 @@ package com.twotoasters.sectioncursoradapter.adapter.datahandler;
 public interface DataHandler<T> {
     T getItemAtPosition(int position);
     int getItemCount();
+
+    /**
+     * @return {@link android.support.v7.widget.RecyclerView#NO_ID}
+     */
     long getItemId(int position);
     boolean hasStableIds();
 }

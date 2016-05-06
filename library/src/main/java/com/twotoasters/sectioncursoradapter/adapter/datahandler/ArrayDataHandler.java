@@ -2,6 +2,7 @@ package com.twotoasters.sectioncursoradapter.adapter.datahandler;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.widget.Filter;
 import android.widget.Filterable;
@@ -38,6 +39,14 @@ public class ArrayDataHandler<T> implements DataHandler<T>, Filterable {
     // the mFilter ArrayFilter is used. mObjects will then only contain the filtered values.
     private ArrayList<T> mOriginalValues;
     private ArrayFilter mFilter;
+
+    /**
+     * Constructor
+     */
+    public ArrayDataHandler() {
+        init(null, null);
+    }
+
     /**
      * Constructor
      *
@@ -93,7 +102,7 @@ public class ArrayDataHandler<T> implements DataHandler<T>, Filterable {
 
     @Override
     public long getItemId(int position) {
-        return position;
+        return RecyclerView.NO_ID;
     }
 
     @Override
@@ -113,7 +122,7 @@ public class ArrayDataHandler<T> implements DataHandler<T>, Filterable {
     public void add(T object) {
         int lastPosition;
         synchronized (mLock) {
-            lastPosition = mObjects.size() - 1;
+            lastPosition = mObjects.size();
             if (mOriginalValues != null) {
                 mOriginalValues.add(object);
                 runFilter();
@@ -131,7 +140,7 @@ public class ArrayDataHandler<T> implements DataHandler<T>, Filterable {
     public void addAll(Collection<? extends T> collection) {
         int lastPosition;
         synchronized (mLock) {
-            lastPosition = mObjects.size() - 1;
+            lastPosition = mObjects.size();
             if (mOriginalValues != null) {
                 mOriginalValues.addAll(collection);
                 runFilter();
@@ -237,7 +246,7 @@ public class ArrayDataHandler<T> implements DataHandler<T>, Filterable {
     }
 
     private void removeRange(List<T> list, int start, int end) {
-        for (int i = start; i < end; i++) {
+        for (int i = end - 1; i >= start; i--) {
             list.remove(i);
         }
     }
