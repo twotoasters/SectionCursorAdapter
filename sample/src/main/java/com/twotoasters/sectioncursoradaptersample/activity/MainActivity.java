@@ -14,6 +14,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.activeandroid.content.ContentProvider;
+import com.twotoasters.sectioncursoradapter.adapter.datahandler.CursorDataHandler;
+import com.twotoasters.sectioncursoradapter.adapter.datahandler.SectionDataWrapper;
 import com.twotoasters.sectioncursoradaptersample.R;
 import com.twotoasters.sectioncursoradaptersample.adapter.ToasterAdapter;
 import com.twotoasters.sectioncursoradaptersample.database.ToasterModel;
@@ -22,6 +24,7 @@ import com.twotoasters.sectioncursoradaptersample.database.ToasterModel;
 public class MainActivity extends ActionBarActivity implements LoaderCallbacks<Cursor> {
 
     ToasterAdapter mAdapter;
+    SectionDataWrapper<String, Cursor, CursorDataHandler> mDataWrapper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +32,9 @@ public class MainActivity extends ActionBarActivity implements LoaderCallbacks<C
         setContentView(R.layout.activity_main);
         getSupportActionBar().setTitle(R.string.two_toasters_team);
 
-        mAdapter = new ToasterAdapter(this, null);
+        mDataWrapper = new SectionDataWrapper<>(new CursorDataHandler(null, 0));
+        mAdapter = new ToasterAdapter(mDataWrapper);
+        mDataWrapper.setSectionBuilder(mAdapter);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.listView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(mAdapter);
@@ -66,11 +71,11 @@ public class MainActivity extends ActionBarActivity implements LoaderCallbacks<C
     }
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mAdapter.swapCursor(data);
+        mDataWrapper.getWrapped().swapCursor(data);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        mAdapter.swapCursor(null);
+        mDataWrapper.getWrapped().swapCursor(null);
     }
 }

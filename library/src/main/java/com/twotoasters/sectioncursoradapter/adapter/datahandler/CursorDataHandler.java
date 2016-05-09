@@ -11,6 +11,10 @@ import android.widget.Filter;
 import android.widget.FilterQueryProvider;
 import android.widget.Filterable;
 
+import com.twotoasters.sectioncursoradapter.util.CollectionUtil;
+
+import java.util.Set;
+
 /**
  * This was designed off (see lifted from, or completely jacked from) of the android support library's CursorAdapter.
  *
@@ -37,6 +41,7 @@ public class CursorDataHandler implements DataHandler<Cursor>, Filterable, Curso
     private DataSetObserver mDataSetObserver;
     private CursorFilter mCursorFilter;
     private FilterQueryProvider mFilterQueryProvider;
+    private Set<DataChangeListener> mChangeListeners = CollectionUtil.createWeakHashSet();
     /**
      * If set the adapter will call requery() on the cursor whenever a content change
      * notification is delivered. Implies {@link #FLAG_REGISTER_CONTENT_OBSERVER}.
@@ -170,6 +175,17 @@ public class CursorDataHandler implements DataHandler<Cursor>, Filterable, Curso
     public boolean hasStableIds() {
         return true;
     }
+
+    @Override
+    public void registerObservable(DataChangeListener listener) {
+        mChangeListeners.add(listener);
+    }
+
+    @Override
+    public void unregisterObservable(DataChangeListener listener) {
+        mChangeListeners.remove(listener);
+    }
+
     /**
      * Returns the cursor. In most cases you will want {@link #getItemAtPosition(int)} instead.
      * @return the cursor.
@@ -216,14 +232,13 @@ public class CursorDataHandler implements DataHandler<Cursor>, Filterable, Curso
             if (mDataSetObserver != null) newCursor.registerDataSetObserver(mDataSetObserver);
             mRowIDColumn = newCursor.getColumnIndexOrThrow("_id");
             mDataValid = true;
-            // notify the observers about the new cursor
-            if (mAdapter != null) mAdapter.notifyDataSetChanged();
         } else {
             mRowIDColumn = -1;
             mDataValid = false;
-            // notify the observers about the lack of a data set
-            if (mAdapter != null) mAdapter.notifyDataSetChanged();
         }
+        // notify the observers about the lack of a data set
+        if (mAdapter != null) mAdapter.notifyDataSetChanged();
+        onChange();
         return oldCursor;
     }
 
@@ -320,6 +335,12 @@ public class CursorDataHandler implements DataHandler<Cursor>, Filterable, Curso
         }
     }
 
+    private void onChange() {
+        for (DataChangeListener listener : mChangeListeners) {
+            listener.onDataChanged();
+        }
+    }
+
     private class ChangeObserver extends ContentObserver {
         public ChangeObserver() {
             super(new Handler());
@@ -340,12 +361,14 @@ public class CursorDataHandler implements DataHandler<Cursor>, Filterable, Curso
         public void onChanged() {
             mDataValid = true;
             if (mAdapter != null) mAdapter.notifyDataSetChanged();
+            CursorDataHandler.this.onChange();
         }
 
         @Override
         public void onInvalidated() {
             mDataValid = false;
             if (mAdapter != null) mAdapter.notifyDataSetChanged();
+            CursorDataHandler.this.onChange();
         }
     }
 }

@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.twotoasters.sectioncursoradapter.adapter.SectionCursorAdapter;
 import com.twotoasters.sectioncursoradapter.adapter.viewholder.SViewHolder;
 
 import org.junit.Before;

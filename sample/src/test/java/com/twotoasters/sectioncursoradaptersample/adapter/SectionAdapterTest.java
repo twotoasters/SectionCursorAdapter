@@ -5,7 +5,6 @@ import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.twotoasters.sectioncursoradapter.adapter.SectionArrayAdapter;
 import com.twotoasters.sectioncursoradaptersample.SampleApp;
 
 import org.junit.Before;
