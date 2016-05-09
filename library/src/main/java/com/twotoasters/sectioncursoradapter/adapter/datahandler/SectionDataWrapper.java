@@ -36,9 +36,13 @@ public class SectionDataWrapper<S, T, D extends DataHandler<T>> extends DataWrap
     }
 
     private void buildSections() {
-        if (mSectionBuilder != null) mSectionMap = buildSectionMap();
+        if (mSectionMap != null) mSectionMap.clear();
         mSectionList.clear();
-        mSectionList.addAll(mSectionMap.keySet());
+
+        if (mSectionBuilder != null) {
+            mSectionMap = buildSectionMap();
+            mSectionList.addAll(mSectionMap.keySet());
+        }
     }
 
     /**
@@ -138,7 +142,7 @@ public class SectionDataWrapper<S, T, D extends DataHandler<T>> extends DataWrap
      * @param listPosition the position of the current item in the list with sections included
      * @return the position without sections included
      */
-    private int getWrappedPosition(int listPosition) {
+    public int getWrappedPosition(int listPosition) {
         if (mSectionMap.size() == 0) {
             return listPosition;
         } else if (!isSection(listPosition)) {

@@ -2,8 +2,6 @@ package com.twotoasters.sectioncursoradaptersample.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,74 +11,53 @@ import android.view.animation.Animation;
 import android.widget.ViewSwitcher;
 
 import com.squareup.picasso.Picasso;
-import com.twotoasters.sectioncursoradapter.adapter.SimpleDataAdapter;
+import com.twotoasters.sectioncursoradapter.adapter.SectionDataAdapter;
 import com.twotoasters.sectioncursoradapter.adapter.datahandler.CursorDataHandler;
 import com.twotoasters.sectioncursoradapter.adapter.datahandler.SectionDataWrapper;
-import com.twotoasters.sectioncursoradapter.adapter.datahandler.SectionDataWrapper.SectionBuilder;
 import com.twotoasters.sectioncursoradaptersample.R;
 import com.twotoasters.sectioncursoradaptersample.adapter.viewholder.ItemViewHolder;
 import com.twotoasters.sectioncursoradaptersample.adapter.viewholder.SectionViewHolder;
 import com.twotoasters.sectioncursoradaptersample.database.ToasterModel;
 import com.twotoasters.sectioncursoradaptersample.transformation.SquareTransformation;
 
-import java.util.SortedMap;
-
-public class ToasterAdapter extends SimpleDataAdapter<Cursor, SectionDataWrapper<String, Cursor, CursorDataHandler>, ViewHolder>
-                                                                        implements SectionBuilder<String,Cursor,CursorDataHandler> {
-    private static final int VIEW_TYPE_SECTION = 0;
-    private static final int VIEW_TYPE_ITEM = 1;
+public class ToasterAdapter extends SectionDataAdapter<String, Cursor, CursorDataHandler> {
 
     private final SquareTransformation mToasterTrans;
     private final SquareTransformation mHumanTrans;
 
     public ToasterAdapter(SectionDataWrapper<String, Cursor, CursorDataHandler> dataHandler) {
         super(dataHandler);
-        dataHandler.getWrapped().setAdapter(this);
 
         mToasterTrans = new SquareTransformation(true);
         mHumanTrans = new SquareTransformation(false);
     }
 
     @Override
-    public int getItemViewType(int position) {
-        return getDataHandler().isSection(position)
-                ? VIEW_TYPE_SECTION
-                : VIEW_TYPE_ITEM;
+    protected void setupWrappedDataHandler(CursorDataHandler dataHandler) {
+        dataHandler.setAdapter(this);
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        switch (viewType) {
-            case VIEW_TYPE_SECTION:
-                return new SectionViewHolder(inflater.inflate(R.layout.item_section, parent, false));
-            case VIEW_TYPE_ITEM:
-                return new ItemViewHolder(inflater.inflate(R.layout.item_toaster, parent, false));
-        }
-        return null;
+    protected ViewHolder onCreateSectionViewHolder(LayoutInflater inflater, ViewGroup parent) {
+        return new SectionViewHolder(inflater.inflate(R.layout.item_section, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        switch (getItemViewType(position)) {
-            case VIEW_TYPE_SECTION:
-                String section = getDataHandler().getSectionFromListPosition(position);
-                onBindSectionViewHolder((SectionViewHolder) holder, section);
-                break;
-            case VIEW_TYPE_ITEM:
-                Cursor cursor = getItemAtPosition(position);
-                onBindItemViewHolder((ItemViewHolder) holder, cursor);
-                break;
-        }
+    protected ViewHolder onCreateItemViewHolder(LayoutInflater inflater, ViewGroup parent) {
+        return new ItemViewHolder(inflater.inflate(R.layout.item_toaster, parent, false));
     }
 
-    protected void onBindSectionViewHolder(SectionViewHolder holder, String section) {
-        holder.textView.setText(section);
+    @Override
+    protected void onBindSectionViewHolder(ViewHolder holder, String section) {
+        ((SectionViewHolder) holder).textView.setText(section);
     }
 
-    protected void onBindItemViewHolder(ItemViewHolder holder, Cursor cursor) {
+    @Override
+    protected void onBindItemViewHolder(ViewHolder viewHolder, Cursor cursor) {
         final ToasterModel toaster = new ToasterModel();
         toaster.loadFromCursor(cursor);
+
+        ItemViewHolder holder = (ItemViewHolder) viewHolder;
 
         holder.txtName.setText(toaster.name);
         holder.txtJob.setText(toaster.jobDescription);
@@ -114,19 +91,5 @@ public class ToasterAdapter extends SimpleDataAdapter<Cursor, SectionDataWrapper
             switcher.setInAnimation(in);
             switcher.setOutAnimation(out);
         }
-    }
-
-    @Nullable
-    @Override
-    public SortedMap<Integer, String> buildSections(CursorDataHandler dataHandler) {
-        return null;
-    }
-
-    @NonNull
-    @Override
-    public String getSectionFromItem(Cursor cursor) {
-        final ToasterModel toaster = new ToasterModel();
-        toaster.loadFromCursor(cursor);
-        return toaster.shortJob;
     }
 }
