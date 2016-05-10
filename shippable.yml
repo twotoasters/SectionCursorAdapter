@@ -20,5 +20,12 @@ build:
         - chmod +x gradlew
         - ./gradlew testDebug
 
-    post_ci:
+    on_success:
         - cp -r sample/build/test-results/* shippable/testresults/
+
+    on_failure:
+        - cp -r sample/build/test-results/* shippable/testresults/
+
+    cache: true
+        cache_dir_list:
+            - $SHIPPABLE_BUILD_DIR/.gradle
