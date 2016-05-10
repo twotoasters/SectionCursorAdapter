@@ -51,7 +51,7 @@ public class SectionDataWrapper<S, T, D extends DataHandler<T>> extends DataWrap
      */
     private SortedMap<Integer, S> buildSectionMap() {
         SortedMap<Integer, S> sections  = mSectionBuilder.buildSections(getWrapped());
-        if (sections != null) return sections;
+        if (sections != null) return new TreeMap<>(sections);
 
         sections = new TreeMap<>();
         int size = super.getItemCount();

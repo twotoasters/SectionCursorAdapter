@@ -66,7 +66,6 @@ public class SectionDataWrapperTests extends Testable {
 
     @Test
     public void itShouldCheckIfSection() {
-        sectionBuilder.setSections(new TreeMap<>(SECTION_MAP));
         assertThat(dataWrapper.isSection(0)).isTrue();
         assertThat(dataWrapper.isSection(1)).isFalse();
         assertThat(dataWrapper.isSection(2)).isFalse();
