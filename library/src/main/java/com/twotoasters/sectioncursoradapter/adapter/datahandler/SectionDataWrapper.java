@@ -186,6 +186,24 @@ public class SectionDataWrapper<S, T, D extends DataHandler<T>> extends DataWrap
         return isSection ? numPrecedingSections : Math.max(numPrecedingSections - 1, 0);
     }
 
+    /**
+     *
+     * @param listPosition the position of the current item in the list with sections included
+     * @return The size of the section that the listPosition is in not including the section header.
+     */
+    public int getSectionSize(int listPosition) {
+        int sectionPosition = getSectionPosition(listPosition);
+        boolean isBeforeFirstSection = isListPositionBeforeFirstSection(listPosition, sectionPosition);
+
+        int count;
+        if (sectionPosition < mSectionList.size() - 1) {
+            count = mSectionList.get(sectionPosition + 1) - mSectionList.get(sectionPosition);
+        } else {
+            count = super.getItemCount() - mSectionList.get(sectionPosition);
+        }
+        return isBeforeFirstSection ? count : count - 1;
+    }
+
     private boolean isListPositionBeforeFirstSection(int listPosition, int sectionIndex) {
         boolean hasSections = mSectionMap != null && mSectionMap.size() > 0;
         return sectionIndex == 0 && hasSections && listPosition < mSectionMap.firstKey();
