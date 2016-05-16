@@ -121,7 +121,7 @@ public class ArrayDataHandler<T> implements DataHandler<T>, Filterable {
 
     @Override
     public void unregisterObservable(DataChangeListener listener) {
-        mChangeListeners.add(listener);
+        mChangeListeners.remove(listener);
     }
 
 
