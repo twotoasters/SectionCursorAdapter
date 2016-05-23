@@ -7,12 +7,15 @@ import android.support.v7.widget.RecyclerView.Adapter;
 import android.widget.Filter;
 import android.widget.Filterable;
 
+import com.twotoasters.sectioncursoradapter.util.CollectionUtil;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * For full animation support {@link #setAdapter(Adapter)}.
@@ -39,6 +42,7 @@ public class ArrayDataHandler<T> implements DataHandler<T>, Filterable {
     // the mFilter ArrayFilter is used. mObjects will then only contain the filtered values.
     private ArrayList<T> mOriginalValues;
     private ArrayFilter mFilter;
+    private Set<DataChangeListener> mChangeListeners = CollectionUtil.createWeakHashSet();
 
     /**
      * Constructor
@@ -110,6 +114,17 @@ public class ArrayDataHandler<T> implements DataHandler<T>, Filterable {
         return false;
     }
 
+    @Override
+    public void registerObservable(DataChangeListener listener) {
+        mChangeListeners.add(listener);
+    }
+
+    @Override
+    public void unregisterObservable(DataChangeListener listener) {
+        mChangeListeners.remove(listener);
+    }
+
+
     public void setAdapter(@Nullable Adapter<?> mAdapter) {
         this.mAdapter = mAdapter;
     }
@@ -131,6 +146,7 @@ public class ArrayDataHandler<T> implements DataHandler<T>, Filterable {
             }
         }
         if (mAdapter != null) mAdapter.notifyItemInserted(lastPosition);
+        onChange();
     }
     /**
      * Adds the specified Collection at the end of the array.
@@ -149,6 +165,7 @@ public class ArrayDataHandler<T> implements DataHandler<T>, Filterable {
             }
         }
         if (mAdapter != null) mAdapter.notifyItemRangeInserted(lastPosition, collection.size());
+        onChange();
     }
     /**
      * Adds the specified items at the end of the array.
@@ -174,6 +191,7 @@ public class ArrayDataHandler<T> implements DataHandler<T>, Filterable {
             }
         }
         if (mAdapter != null) mAdapter.notifyItemInserted(index);
+        onChange();
     }
     /**
      * Inserts the specified object at the specified index in the array.
@@ -191,6 +209,7 @@ public class ArrayDataHandler<T> implements DataHandler<T>, Filterable {
             }
         }
         if (mAdapter != null) mAdapter.notifyItemRangeInserted(index, collection.size());
+        onChange();
     }
     /**
      * Removes the specified object from the array.
@@ -210,6 +229,7 @@ public class ArrayDataHandler<T> implements DataHandler<T>, Filterable {
             }
         }
         if (mAdapter != null) mAdapter.notifyItemRemoved(index);
+        onChange();
     }
     /**
      * Removes the specified object from the array.
@@ -226,6 +246,7 @@ public class ArrayDataHandler<T> implements DataHandler<T>, Filterable {
             }
         }
         if (mAdapter != null) mAdapter.notifyItemRemoved(index);
+        onChange();
     }
     /**
      * Removes the specified object from the array.
@@ -243,6 +264,7 @@ public class ArrayDataHandler<T> implements DataHandler<T>, Filterable {
             }
         }
         if (mAdapter != null) mAdapter.notifyItemRangeRemoved(start, end - start);
+        onChange();
     }
 
     private void removeRange(List<T> list, int start, int end) {
@@ -264,6 +286,7 @@ public class ArrayDataHandler<T> implements DataHandler<T>, Filterable {
             }
         }
         if (mAdapter != null) mAdapter.notifyDataSetChanged();
+        onChange();
     }
 
     /**
@@ -282,6 +305,13 @@ public class ArrayDataHandler<T> implements DataHandler<T>, Filterable {
             }
         }
         if (mAdapter != null) mAdapter.notifyDataSetChanged();
+        onChange();
+    }
+
+    private void onChange() {
+        for (DataChangeListener listener : mChangeListeners) {
+            listener.onDataChanged();
+        }
     }
 
     /**
@@ -364,6 +394,7 @@ public class ArrayDataHandler<T> implements DataHandler<T>, Filterable {
         protected void publishResults(CharSequence constraint, FilterResults results) {
             mObjects = (List<T>) results.values;
             if (mAdapter != null) mAdapter.notifyDataSetChanged();
+            onChange();
             if (mObjects == mOriginalValues) mOriginalValues = null;
         }
     }

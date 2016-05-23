@@ -18,4 +18,10 @@ public interface DataHandler<T> {
      */
     long getItemId(int position);
     boolean hasStableIds();
+    void registerObservable(DataChangeListener listener);
+    void unregisterObservable(DataChangeListener listener);
+
+    interface DataChangeListener {
+        void onDataChanged();
+    }
 }
