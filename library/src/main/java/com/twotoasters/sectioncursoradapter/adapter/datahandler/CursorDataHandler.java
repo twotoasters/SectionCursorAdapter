@@ -136,7 +136,7 @@ public class CursorDataHandler implements DataHandler<Cursor>, Filterable, Curso
      */
     @Override
     public Cursor getItemAtPosition(int position) throws IllegalStateException {
-        if (mCursor != null) {
+        if (hasOpenCursor()) {
             if (!mDataValid) {
                 throw new IllegalStateException("this should only be called when the cursor is valid");
             }
@@ -151,7 +151,7 @@ public class CursorDataHandler implements DataHandler<Cursor>, Filterable, Curso
 
     @Override
     public int getItemCount() {
-        if (mDataValid && mCursor != null) {
+        if (mDataValid && hasOpenCursor()) {
             return mCursor.getCount();
         } else {
             return 0;
@@ -160,7 +160,7 @@ public class CursorDataHandler implements DataHandler<Cursor>, Filterable, Curso
 
     @Override
     public long getItemId(int position) {
-        if (mDataValid && mCursor != null) {
+        if (mDataValid && hasOpenCursor()) {
             if (mCursor.moveToPosition(position)) {
                 return mCursor.getLong(mRowIDColumn);
             } else {
@@ -202,7 +202,7 @@ public class CursorDataHandler implements DataHandler<Cursor>, Filterable, Curso
      */
     public void changeCursor(Cursor cursor) {
         Cursor old = swapCursor(cursor);
-        if (old != null) {
+        if (old != null && !old.isClosed()) {
             old.close();
         }
     }
@@ -240,6 +240,19 @@ public class CursorDataHandler implements DataHandler<Cursor>, Filterable, Curso
         if (mAdapter != null) mAdapter.notifyDataSetChanged();
         onChange();
         return oldCursor;
+    }
+
+    /**
+     * @return True if cursor is not null and open.
+     * If the cursor is closed a null cursor will be swapped out.
+     */
+    protected boolean hasOpenCursor() {
+        Cursor cursor = getCursor();
+        if (cursor != null && cursor.isClosed()) {
+            swapCursor(null);
+            return false;
+        }
+        return cursor != null;
     }
 
     /**
@@ -330,7 +343,7 @@ public class CursorDataHandler implements DataHandler<Cursor>, Filterable, Curso
      * @see ContentObserver#onChange(boolean)
      */
     protected void onContentChanged() {
-        if (mAutoRequery && mCursor != null && !mCursor.isClosed()) {
+        if (mAutoRequery && hasOpenCursor()) {
             mDataValid = mCursor.requery();
         }
     }
