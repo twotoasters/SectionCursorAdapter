@@ -1,4 +1,4 @@
-package com.twotoasters.sectioncursoradapter.adapter;
+package com.twotoasters.sectioncursoradapter.adapter.datahandler;
 
 import android.database.Cursor;
 import android.widget.Filter;
