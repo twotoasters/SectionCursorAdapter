@@ -15,6 +15,8 @@ android {
         targetSdkVersion Integer.parseInt(ANDROID_BUILD_TARGET_SDK_VERSION)
         versionCode Integer.parseInt(VERSION_CODE)
         versionName VERSION_NAME
+
+        multiDexEnabled true
     }
 
     compileOptions {

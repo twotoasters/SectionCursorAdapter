@@ -214,6 +214,23 @@ public class SectionDataWrapperTests extends Testable {
         assertThat(fastScrollObjects[2]).isEqualTo("C");
     }
 
+    @Test
+    public void itShouldGetSectionSize() throws Exception {
+        sectionBuilder.setSections(new TreeMap<>(SECTION_MAP_ALT));
+        dataWrapper.onDataChanged();
+
+        assertThat(dataWrapper.getSectionSize(0)).isEqualTo(2);
+        assertThat(dataWrapper.getSectionSize(1)).isEqualTo(2);
+        assertThat(dataWrapper.getSectionSize(2)).isEqualTo(1);
+        assertThat(dataWrapper.getSectionSize(3)).isEqualTo(1);
+        assertThat(dataWrapper.getSectionSize(4)).isEqualTo(0);
+        assertThat(dataWrapper.getSectionSize(5)).isEqualTo(4);
+        assertThat(dataWrapper.getSectionSize(6)).isEqualTo(4);
+        assertThat(dataWrapper.getSectionSize(7)).isEqualTo(4);
+        assertThat(dataWrapper.getSectionSize(8)).isEqualTo(4);
+        assertThat(dataWrapper.getSectionSize(9)).isEqualTo(4);
+    }
+
     private static class TestSectionBuilder implements SectionBuilder<String, Cursor, CursorDataHandler> {
         public SortedMap<Integer, String> sections;
 
