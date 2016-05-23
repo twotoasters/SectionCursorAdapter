@@ -1,116 +1,47 @@
-/*
- * Copyright (C) 2011 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package com.twotoasters.sectioncursoradapter.adapter;
+package com.twotoasters.sectioncursoradapter.adapter.datahandler;
 
 import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView.Adapter;
-import android.support.v7.widget.RecyclerView.ViewHolder;
-import android.util.Log;
 import android.widget.Filter;
 import android.widget.FilterQueryProvider;
 import android.widget.Filterable;
 
+import com.twotoasters.sectioncursoradapter.util.CollectionUtil;
+
+import java.util.Set;
+
 /**
  * This was designed off (see lifted from, or completely jacked from) of the android support library's CursorAdapter.
+ *
+ * Primary keys should be set to "_id"
  *
  * Static library support version of the framework's {@link android.widget.CursorAdapter}.
  * Used to write apps that run on platforms prior to Android 3.0.  When running
  * on Android 3.0 or above, this implementation is still used; it does not try
  * to switch to the framework's implementation.  See the framework SDK
  * documentation for a class overview.
+ *
+ * This {@link DataHandler} does not have direct support for animation remove, insert or move operation.
  */
-public abstract class RecyclerCursorAdapter<VH extends ViewHolder> extends Adapter<VH> implements Filterable, CursorFilter.CursorFilterClient {
+@SuppressWarnings({ "deprecation", "unused" })
+public class CursorDataHandler implements DataHandler<Cursor>, Filterable, CursorFilter.CursorFilterClient  {
+    @Nullable private Adapter<?> mAdapter;
 
-    // ******** RecyclerAdapter stuff. ******** //
-
-    @Override
-    public void onBindViewHolder(VH holder, int position) {
-        if (!mDataValid) {
-            throw new IllegalStateException("this should only be called when the cursor is valid");
-        }
-        if (!mCursor.moveToPosition(position)) {
-            throw new IllegalStateException("couldn't move cursor to position " + position);
-        }
-
-        onBindViewHolder(holder, position, mCursor);
-    }
-
-    abstract public void onBindViewHolder(VH holder, int position, Cursor cursor);
-
-    @Override
-    public int getItemCount() {
-        if (mDataValid && mCursor != null) {
-            return mCursor.getCount();
-        } else {
-            return 0;
-        }
-    }
-
-    // ******** CursorAdapter stuff. ******** //
-
-    /**
-     * This field should be made private, so it is hidden from the SDK.
-     * {@hide}
-     */
-    protected boolean mDataValid;
-    /**
-     * This field should be made private, so it is hidden from the SDK.
-     * {@hide}
-     */
-    protected boolean mAutoRequery;
-    /**
-     * This field should be made private, so it is hidden from the SDK.
-     * {@hide}
-     */
-    protected Cursor mCursor;
-    /**
-     * This field should be made private, so it is hidden from the SDK.
-     * {@hide}
-     */
-    protected Context mContext;
-    /**
-     * This field should be made private, so it is hidden from the SDK.
-     * {@hide}
-     */
-    protected int mRowIDColumn;
-    /**
-     * This field should be made private, so it is hidden from the SDK.
-     * {@hide}
-     */
-    protected ChangeObserver mChangeObserver;
-    /**
-     * This field should be made private, so it is hidden from the SDK.
-     * {@hide}
-     */
-    protected DataSetObserver mDataSetObserver;
-    /**
-     * This field should be made private, so it is hidden from the SDK.
-     * {@hide}
-     */
-    protected CursorFilter mCursorFilter;
-    /**
-     * This field should be made private, so it is hidden from the SDK.
-     * {@hide}
-     */
-    protected FilterQueryProvider mFilterQueryProvider;
+    private boolean mDataValid;
+    private boolean mAutoRequery;
+    private Cursor mCursor;
+    private Context mContext;
+    private int mRowIDColumn;
+    private ChangeObserver mChangeObserver;
+    private DataSetObserver mDataSetObserver;
+    private CursorFilter mCursorFilter;
+    private FilterQueryProvider mFilterQueryProvider;
+    private Set<DataChangeListener> mChangeListeners = CollectionUtil.createWeakHashSet();
     /**
      * If set the adapter will call requery() on the cursor whenever a content change
      * notification is delivered. Implies {@link #FLAG_REGISTER_CONTENT_OBSERVER}.
@@ -140,40 +71,37 @@ public abstract class RecyclerCursorAdapter<VH extends ViewHolder> extends Adapt
      * use {@link android.app.LoaderManager} with a {@link android.content.CursorLoader}.
      *
      * @param c The cursor from which to get the data.
-     * @param context The context
      */
     @Deprecated
-    public RecyclerCursorAdapter(Context context, Cursor c) {
-        init(context, c, FLAG_AUTO_REQUERY);
+    public CursorDataHandler(Cursor c) {
+        init(c, FLAG_AUTO_REQUERY);
     }
     /**
      * Constructor that allows control over auto-requery.  It is recommended
-     * you not use this, but instead {@link #RecyclerCursorAdapter(Context, Cursor, int)}.
+     * you not use this, but instead {@link #CursorDataHandler(Cursor, int)}.
      * When using this constructor, {@link #FLAG_REGISTER_CONTENT_OBSERVER}
      * will always be set.
      *
      * @param c The cursor from which to get the data.
-     * @param context The context
      * @param autoRequery If true the adapter will call requery() on the
      *                    cursor whenever it changes so the most recent
      *                    data is always displayed.  Using true here is discouraged.
      */
-    public RecyclerCursorAdapter(Context context, Cursor c, boolean autoRequery) {
-        init(context, c, autoRequery ? FLAG_AUTO_REQUERY : FLAG_REGISTER_CONTENT_OBSERVER);
+    public CursorDataHandler(Cursor c, boolean autoRequery) {
+        init(c, autoRequery ? FLAG_AUTO_REQUERY : FLAG_REGISTER_CONTENT_OBSERVER);
     }
     /**
      * Recommended constructor.
      *
      * @param c The cursor from which to get the data.
-     * @param context The context
      * @param flags Flags used to determine the behavior of the adapter; may
      * be any combination of {@link #FLAG_AUTO_REQUERY} and
      * {@link #FLAG_REGISTER_CONTENT_OBSERVER}.
      */
-    public RecyclerCursorAdapter(Context context, Cursor c, int flags) {
-        init(context, c, flags);
+    public CursorDataHandler(Cursor c, int flags) {
+        init(c, flags);
     }
-    void init(Context context, Cursor c, int flags) {
+    void init(Cursor c, int flags) {
         if ((flags & FLAG_AUTO_REQUERY) == FLAG_AUTO_REQUERY) {
             flags |= FLAG_REGISTER_CONTENT_OBSERVER;
             mAutoRequery = true;
@@ -183,7 +111,6 @@ public abstract class RecyclerCursorAdapter<VH extends ViewHolder> extends Adapt
         boolean cursorPresent = c != null;
         mCursor = c;
         mDataValid = cursorPresent;
-        mContext = context;
         mRowIDColumn = cursorPresent ? c.getColumnIndexOrThrow("_id") : -1;
         if ((flags & FLAG_REGISTER_CONTENT_OBSERVER) == FLAG_REGISTER_CONTENT_OBSERVER) {
             mChangeObserver = new ChangeObserver();
@@ -197,30 +124,25 @@ public abstract class RecyclerCursorAdapter<VH extends ViewHolder> extends Adapt
             if (mDataSetObserver != null) c.registerDataSetObserver(mDataSetObserver);
         }
     }
-    /**
-     * Returns the cursor. In most cases you will want getCursorAtPosition instead.
-     * @return the cursor.
-     */
-    public Cursor getCursor() {
-        return mCursor;
+
+    public void setAdapter(@Nullable Adapter<?> mAdapter) {
+        this.mAdapter = mAdapter;
     }
 
     /**
-     * @param position The position you are interested in.
+     * @param position The position in the cursor you are interested in.
      * @return The set cursor at the new requested position.
+     * @throws IllegalStateException if the cursor is unable to move to requested position
      */
-    public Cursor getCursorAtPosition(int position) {
-        if (mDataValid && mCursor != null) {
-            mCursor.moveToPosition(position);
-            return mCursor;
-        } else {
-            return null;
-        }
-    }
-
-    public Object getItem(int position) {
-        if (mDataValid && mCursor != null) {
-            mCursor.moveToPosition(position);
+    @Override
+    public Cursor getItemAtPosition(int position) throws IllegalStateException {
+        if (hasOpenCursor()) {
+            if (!mDataValid) {
+                throw new IllegalStateException("this should only be called when the cursor is valid");
+            }
+            if (!mCursor.moveToPosition(position)) {
+                throw new IllegalStateException("couldn't move cursor to position " + position);
+            }
             return mCursor;
         } else {
             return null;
@@ -228,8 +150,17 @@ public abstract class RecyclerCursorAdapter<VH extends ViewHolder> extends Adapt
     }
 
     @Override
+    public int getItemCount() {
+        if (mDataValid && hasOpenCursor()) {
+            return mCursor.getCount();
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
     public long getItemId(int position) {
-        if (mDataValid && mCursor != null) {
+        if (mDataValid && hasOpenCursor()) {
             if (mCursor.moveToPosition(position)) {
                 return mCursor.getLong(mRowIDColumn);
             } else {
@@ -240,6 +171,29 @@ public abstract class RecyclerCursorAdapter<VH extends ViewHolder> extends Adapt
         }
     }
 
+    @Override
+    public boolean hasStableIds() {
+        return true;
+    }
+
+    @Override
+    public void registerObservable(DataChangeListener listener) {
+        mChangeListeners.add(listener);
+    }
+
+    @Override
+    public void unregisterObservable(DataChangeListener listener) {
+        mChangeListeners.remove(listener);
+    }
+
+    /**
+     * Returns the cursor. In most cases you will want {@link #getItemAtPosition(int)} instead.
+     * @return the cursor.
+     */
+    public Cursor getCursor() {
+        return mCursor;
+    }
+
     /**
      * Change the underlying cursor to a new cursor. If there is an existing cursor it will be
      * closed.
@@ -248,7 +202,7 @@ public abstract class RecyclerCursorAdapter<VH extends ViewHolder> extends Adapt
      */
     public void changeCursor(Cursor cursor) {
         Cursor old = swapCursor(cursor);
-        if (old != null) {
+        if (old != null && !old.isClosed()) {
             old.close();
         }
     }
@@ -278,15 +232,27 @@ public abstract class RecyclerCursorAdapter<VH extends ViewHolder> extends Adapt
             if (mDataSetObserver != null) newCursor.registerDataSetObserver(mDataSetObserver);
             mRowIDColumn = newCursor.getColumnIndexOrThrow("_id");
             mDataValid = true;
-            // notify the observers about the new cursor
-            notifyDataSetChanged();
         } else {
             mRowIDColumn = -1;
             mDataValid = false;
-            // notify the observers about the lack of a data set
-            notifyDataSetChanged();
         }
+        // notify the observers about the lack of a data set
+        if (mAdapter != null) mAdapter.notifyDataSetChanged();
+        onChange();
         return oldCursor;
+    }
+
+    /**
+     * @return True if cursor is not null and open.
+     * If the cursor is closed a null cursor will be swapped out.
+     */
+    protected boolean hasOpenCursor() {
+        Cursor cursor = getCursor();
+        if (cursor != null && cursor.isClosed()) {
+            swapCursor(null);
+            return false;
+        }
+        return cursor != null;
     }
 
     /**
@@ -377,9 +343,14 @@ public abstract class RecyclerCursorAdapter<VH extends ViewHolder> extends Adapt
      * @see ContentObserver#onChange(boolean)
      */
     protected void onContentChanged() {
-        if (mAutoRequery && mCursor != null && !mCursor.isClosed()) {
-            if (false) Log.v("Cursor", "Auto requerying " + mCursor + " due to update");
+        if (mAutoRequery && hasOpenCursor()) {
             mDataValid = mCursor.requery();
+        }
+    }
+
+    private void onChange() {
+        for (DataChangeListener listener : mChangeListeners) {
+            listener.onDataChanged();
         }
     }
 
@@ -391,21 +362,26 @@ public abstract class RecyclerCursorAdapter<VH extends ViewHolder> extends Adapt
         public boolean deliverSelfNotifications() {
             return true;
         }
+
         @Override
         public void onChange(boolean selfChange) {
             onContentChanged();
         }
     }
+
     private class MyDataSetObserver extends DataSetObserver {
         @Override
         public void onChanged() {
             mDataValid = true;
-            notifyDataSetChanged();
+            if (mAdapter != null) mAdapter.notifyDataSetChanged();
+            CursorDataHandler.this.onChange();
         }
+
         @Override
         public void onInvalidated() {
             mDataValid = false;
-            notifyDataSetChanged();
+            if (mAdapter != null) mAdapter.notifyDataSetChanged();
+            CursorDataHandler.this.onChange();
         }
     }
 }

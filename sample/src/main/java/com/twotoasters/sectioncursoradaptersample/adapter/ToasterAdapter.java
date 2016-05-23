@@ -2,6 +2,8 @@ package com.twotoasters.sectioncursoradaptersample.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -9,65 +11,67 @@ import android.view.animation.Animation;
 import android.widget.ViewSwitcher;
 
 import com.squareup.picasso.Picasso;
-import com.twotoasters.sectioncursoradapter.adapter.SectionCursorAdapter;
+import com.twotoasters.sectioncursoradapter.adapter.SectionDataAdapter;
+import com.twotoasters.sectioncursoradapter.adapter.datahandler.CursorDataHandler;
+import com.twotoasters.sectioncursoradapter.adapter.datahandler.SectionDataWrapper;
 import com.twotoasters.sectioncursoradaptersample.R;
 import com.twotoasters.sectioncursoradaptersample.adapter.viewholder.ItemViewHolder;
 import com.twotoasters.sectioncursoradaptersample.adapter.viewholder.SectionViewHolder;
 import com.twotoasters.sectioncursoradaptersample.database.ToasterModel;
 import com.twotoasters.sectioncursoradaptersample.transformation.SquareTransformation;
 
-public class ToasterAdapter extends SectionCursorAdapter<String, SectionViewHolder, ItemViewHolder> {
+public class ToasterAdapter extends SectionDataAdapter<String, Cursor, CursorDataHandler> {
 
     private final SquareTransformation mToasterTrans;
     private final SquareTransformation mHumanTrans;
 
-    public ToasterAdapter(Context context, Cursor cursor) {
-        super(context, cursor, 0, R.layout.item_section, R.layout.item_toaster);
+    public ToasterAdapter(SectionDataWrapper<String, Cursor, CursorDataHandler> dataHandler) {
+        super(dataHandler);
 
         mToasterTrans = new SquareTransformation(true);
         mHumanTrans = new SquareTransformation(false);
     }
 
     @Override
-    protected String getSectionFromCursor(Cursor cursor) {
+    protected void setupWrappedDataHandler(CursorDataHandler dataHandler) {
+        dataHandler.setAdapter(this);
+    }
+
+    @Override
+    protected ViewHolder onCreateSectionViewHolder(LayoutInflater inflater, ViewGroup parent) {
+        return new SectionViewHolder(inflater.inflate(R.layout.item_section, parent, false));
+    }
+
+    @Override
+    protected ViewHolder onCreateItemViewHolder(LayoutInflater inflater, ViewGroup parent) {
+        return new ItemViewHolder(inflater.inflate(R.layout.item_toaster, parent, false));
+    }
+
+    @Override
+    protected void onBindSectionViewHolder(ViewHolder holder, String section) {
+        ((SectionViewHolder) holder).textView.setText(section);
+    }
+
+    @Override
+    protected void onBindItemViewHolder(ViewHolder viewHolder, Cursor cursor) {
         final ToasterModel toaster = new ToasterModel();
         toaster.loadFromCursor(cursor);
-        return toaster.shortJob;
-    }
 
-    @Override
-    protected SectionViewHolder onCreateSectionViewHolder(View sectionView, ViewGroup parent) {
-        return new SectionViewHolder(sectionView);
-    }
+        ItemViewHolder holder = (ItemViewHolder) viewHolder;
 
-    @Override
-    protected void onBindSectionViewHolder(SectionViewHolder sectionViewHolder, int position, String section) {
-        sectionViewHolder.textView.setText(section);
-    }
+        holder.txtName.setText(toaster.name);
+        holder.txtJob.setText(toaster.jobDescription);
 
-    @Override
-    protected ItemViewHolder onCreateItemViewHolder(View itemView, ViewGroup parent, int viewType) {
-        return new ItemViewHolder(itemView);
-    }
-
-    @Override
-    protected void onBindItemViewHolder(ItemViewHolder itemViewHolder, Cursor cursor) {
-        final ToasterModel toaster = new ToasterModel();
-        toaster.loadFromCursor(cursor);
-
-        itemViewHolder.txtName.setText(toaster.name);
-        itemViewHolder.txtJob.setText(toaster.jobDescription);
-
-        Context context = itemViewHolder.itemView.getContext();
+        Context context = holder.itemView.getContext();
         Picasso.with(context).load(toaster.imageUrl)
                 .error(R.drawable.toaster_backup).transform(mToasterTrans)
-                .into(itemViewHolder.imgToaster);
+                .into(holder.imgToaster);
         Picasso.with(context).load(toaster.imageUrl)
                 .error(R.drawable.toaster_backup).transform(mHumanTrans)
-                .into(itemViewHolder.imgHuman);
+                .into(holder.imgHuman);
         // Resetting the view our switcher is showing.
-        switchWithoutAnimation(itemViewHolder.switcher);
-        itemViewHolder.switcher.setOnClickListener(new OnClickListener() {
+        switchWithoutAnimation(holder.switcher);
+        holder.switcher.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 ((ViewSwitcher) v).showNext();
