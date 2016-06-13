@@ -246,6 +246,8 @@ public class SectionDataWrapper<S, T, D extends DataHandler<T>> extends DataWrap
      * starts at adapter position 100. Calling this method with position 10,
      * which is before the first section, must return index 0.
      *
+     * Does the same thing as {@link #getSectionPosition} but for {@link SectionIndexer}.
+     *
      * @param position the position within the adapter for which to return the
      *            corresponding section index
      * @return the index of the corresponding section within the array of

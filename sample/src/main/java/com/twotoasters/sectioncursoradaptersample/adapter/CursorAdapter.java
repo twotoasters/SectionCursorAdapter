@@ -2,6 +2,8 @@ package com.twotoasters.sectioncursoradaptersample.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,18 +16,22 @@ import com.squareup.picasso.Picasso;
 import com.twotoasters.sectioncursoradapter.adapter.SectionDataAdapter;
 import com.twotoasters.sectioncursoradapter.adapter.datahandler.CursorDataHandler;
 import com.twotoasters.sectioncursoradapter.adapter.datahandler.SectionDataWrapper;
+import com.twotoasters.sectioncursoradapter.adapter.datahandler.SectionDataWrapper.SectionBuilder;
 import com.twotoasters.sectioncursoradaptersample.R;
 import com.twotoasters.sectioncursoradaptersample.adapter.viewholder.ItemViewHolder;
 import com.twotoasters.sectioncursoradaptersample.adapter.viewholder.SectionViewHolder;
 import com.twotoasters.sectioncursoradaptersample.database.ToasterModel;
 import com.twotoasters.sectioncursoradaptersample.transformation.SquareTransformation;
 
-public class ToasterAdapter extends SectionDataAdapter<String, Cursor, CursorDataHandler> {
+import java.util.SortedMap;
+
+public class CursorAdapter extends SectionDataAdapter<String, Cursor, CursorDataHandler>
+        implements SectionBuilder<String,Cursor,CursorDataHandler> {
 
     private final SquareTransformation mToasterTrans;
     private final SquareTransformation mHumanTrans;
 
-    public ToasterAdapter(SectionDataWrapper<String, Cursor, CursorDataHandler> dataHandler) {
+    public CursorAdapter(SectionDataWrapper<String, Cursor, CursorDataHandler> dataHandler) {
         super(dataHandler);
 
         mToasterTrans = new SquareTransformation(true);
@@ -91,5 +97,19 @@ public class ToasterAdapter extends SectionDataAdapter<String, Cursor, CursorDat
             switcher.setInAnimation(in);
             switcher.setOutAnimation(out);
         }
+    }
+
+    @Nullable
+    @Override
+    public SortedMap<Integer, String> buildSections(CursorDataHandler dataHandler) {
+        return null; // Not going to give this a pre-built map so null is what we want to hand back.
+    }
+
+    @NonNull
+    @Override
+    public String getSectionFromItem(Cursor cursor) {
+        final ToasterModel toaster = new ToasterModel();
+        toaster.loadFromCursor(cursor);
+        return toaster.shortJob;
     }
 }

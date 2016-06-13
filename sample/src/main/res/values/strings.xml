@@ -4,5 +4,7 @@
     <string name="app_name">SectionCursorAdapter Sample</string>
     <string name="action_contact">Contact Us</string>
     <string name="two_toasters_team">Two Toasters Team</string>
+    <string name="action_switch_to_cursor">Switch to Cursor</string>
+    <string name="action_switch_to_array">Switch to Array</string>
 
 </resources>
