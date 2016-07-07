@@ -2,7 +2,6 @@ package com.twotoasters.sectioncursoradapter.adapter.datahandler;
 
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.widget.SectionIndexer;
@@ -58,7 +57,7 @@ public class SectionDataWrapper<S, T, D extends DataHandler<T>> extends DataWrap
         for (int i = 0; i < size; i++) {
             T item = super.getItemAtPosition(i);
             S section = mSectionBuilder.getSectionFromItem(item);
-            if (!sections.containsValue(section))
+            if (section != null && !sections.containsValue(section))
                 sections.put(i + sections.size(), section);
         }
         return sections;
@@ -82,8 +81,9 @@ public class SectionDataWrapper<S, T, D extends DataHandler<T>> extends DataWrap
          * The object which is return will determine what section this cursor position will be in.
          * @return the section from the cursor at its current position.
          * This object will be passed to newSectionView and bindSectionView.
+         * Null should only be returned at the start if you do not want it to start with a section
          */
-        @NonNull
+        @Nullable
         S getSectionFromItem(T item);
     }
 
