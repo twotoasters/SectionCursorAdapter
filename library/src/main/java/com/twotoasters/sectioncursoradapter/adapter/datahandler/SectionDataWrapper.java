@@ -105,7 +105,7 @@ public class SectionDataWrapper<S, T, D extends DataHandler<T>> extends DataWrap
         int wrappedPosition = getWrappedPosition(listPosition);
 
         return wrappedPosition == RecyclerView.NO_POSITION
-                ? getSectionFromListPosition(listPosition).hashCode()
+                ? Integer.MAX_VALUE - listPosition
                 : super.getItemId(wrappedPosition);
     }
 
